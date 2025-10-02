@@ -1,0 +1,15 @@
+[project]
+name = "chatbot-langraph-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi[all]>=0.118.0",
+    "langchain>=0.3.27",
+    "langchain-openai>=0.3.34",
+    "psycopg2-binary>=2.9.10",
+    "python-dotenv>=1.1.1",
+    "sqlalchemy>=2.0.43",
+    "uvicorn>=0.37.0",
+]
