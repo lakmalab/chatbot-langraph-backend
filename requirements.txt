@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+uv
+langchain
+langchain-openai
+sqlalchemy
+pymysql
