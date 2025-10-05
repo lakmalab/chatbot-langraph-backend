@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 
 app = FastAPI(
-    title= "ChatBot Assistant Service",
-    version= "0.1.0",
+    title= settings.APP_NAME,
+    version= settings.APP_VERSION,
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -19,4 +19,9 @@ app.add_middleware(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=True
+    )
