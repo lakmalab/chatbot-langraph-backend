@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
 
+    SESSION_EXPIRE_HOURS: int
     OPENAI_API_KEY:str
     API_BASE_URL: str = "http://localhost:8000"
 

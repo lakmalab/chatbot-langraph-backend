@@ -1,1 +1,0 @@
-f"mysql+pymysql://{config.DB_USER}:{config.DB_PASSWORD}"

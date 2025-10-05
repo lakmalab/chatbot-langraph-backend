@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.routes import session
 from core.config import settings
 
 app = FastAPI(
@@ -25,3 +27,5 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=True
     )
+
+app.include_router(session.router)
