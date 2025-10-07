@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -17,7 +18,7 @@ class ChatMessageResponse(BaseModel):
     conversation_id: int
     response: str
     intent: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict] = None
 
 
 class ConversationResponse(BaseModel):
@@ -39,3 +40,4 @@ class MessageHistory(BaseModel):
 
     class Config:
         from_attributes = True
+

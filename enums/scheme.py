@@ -1,6 +1,6 @@
-import enum
+from enum import Enum
 
-class SchemeType(str, enum.Enum):
+class SchemeType(str, Enum):
     PENSION = "pension"
     VEHICLE = "vehicle"
     CROP = "crop"

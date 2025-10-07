@@ -4,7 +4,7 @@ from db.connection import get_db
 from schemas.session import SessionCreate, SessionResponse
 from service.session_service import SessionService
 
-router = APIRouter(prefix="/api/session", tags=["Session"])
+router = APIRouter(prefix="/api/v1/session", tags=["Session"])
 
 @router.post("/create", response_model=SessionResponse)
 async def create_session(

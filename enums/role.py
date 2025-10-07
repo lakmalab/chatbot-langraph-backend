@@ -1,6 +1,6 @@
-import enum
+from enum import Enum
 
-class RoleType(str, enum.Enum):
+class RoleType(str, Enum):
     USER = "user"
-    ADMIN = "admin"
-    BOT = "bot"
+    ASSISTANT = "assistant"
+    SYSTEM = "system"

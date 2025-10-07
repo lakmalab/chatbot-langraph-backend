@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import session
 from core.config import settings
+from api.routes.v1 import session, chat
 
 app = FastAPI(
     title= settings.APP_NAME,
@@ -29,3 +29,17 @@ if __name__ == "__main__":
     )
 
 app.include_router(session.router)
+app.include_router(chat.router)
+
+
+@app.get("/")
+async def root():
+    return {
+        "message": f"{settings.APP_NAME} API is running",
+        "status": "healthy",
+        "debug_mode": settings.DEBUG
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
