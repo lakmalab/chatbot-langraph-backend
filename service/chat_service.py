@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
 
+from agents.graph import create_pension_agent
+from agents.state import AgentState
 from enums import RoleType, SchemeType
 from models.conversation import Conversation
 from models.chat_message import ChatMessage
@@ -35,11 +37,46 @@ class ChatService:
             content=user_message
         )
 
+        initial_state: AgentState = {
+            "messages": history + [HumanMessage(content=user_message)],
+            "user_query": user_message,
+            "session_id": session_id,
+            "conversation_id": conversation.id,
+            "intent": None,
+            "current_age": None,
+            "desired_pension": None,
+            "calculation_result": None,
+            "response": "",
+            "next_action": None
+        }
 
+        result = await self.agent.ainvoke(initial_state)
+
+        response_text = result.get("response", "I'm sorry, I couldn't process that.")
+        intent = result.get("intent")
+
+        self.save_message(
+            conversation_id=conversation.id,
+            role=RoleType.ASSISTANT,
+            content=response_text,
+            intent=intent
+        )
+        if result.get("calculation_result"):
+            self.save_calculation(
+                session_id=session_id,
+                conversation_id=conversation.id,
+                calculation_result=result["calculation_result"],
+                current_age=result["current_age"],
+                desired_pension=result["desired_pension"]
+            )
 
         return {
-            "conversation_id": conversation_id,
-            "response": "hello"
+            "conversation_id": conversation.id,
+            "response": response_text,
+            "intent": intent,
+            "metadata": {
+                "calculation_result": result.get("calculation_result")
+            }
         }
 
     def get_or_create_conversation(self, session_id, conversation_id, scheme_type):
