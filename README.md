@@ -1,7 +1,34 @@
-Langraph Agentic AI Chat Assisitant
+# Langraph Agentic AI Chat Assisitant
 #-----------------------------------#
 
-# Setup Instructions written painlessly for you by me Lakmalllllll
+User: "I am 30 and want 50k pension"
+           ↓
+    [LangGraph Graph]
+           ↓
+┌─────────────────────┐
+│ Node 1: Classify    │ → "pension / crop insurance / Vehicle insurance"
+│ Intent              │
+└──────────┬──────────┘
+           |         "pension" intent detected
+           |         since user wants to 
+           ↓         calculate pension
+┌─────────────────────┐
+│ Node 2: Extract     │ → age=30, pension=50000
+│ Parameters          │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ Node 3: Calculate   │ → Uses PensionCalculator
+│ Pension             │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ Node 4: Generate    │ → Natural language response
+│ Response            │
+└─────────────────────┘
+
+---Setup Instructions written painlessly for you by me Lakmalllllll---
+
 steps to set up the development environment:
 #############Warning - NEED Python 3.10 or Higher###########################
 
