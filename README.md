@@ -1,12 +1,12 @@
-# Langraph Agentic AI Chat Assistant
+# LangGraph Agentic AI Chat Assistant
 
-An intelligent **Agentic AI Chat Assistant** powered by LangGraph — designed to classify user intent, extract key data, and perform dynamic calculations such as pension or insurance estimation.
+An intelligent **Agentic AI Chat Assistant** powered by **LangGraph + FastAPI**, designed to classify user intent, extract key data, and perform dynamic calculations such as **pension or insurance estimation** — all managed seamlessly using **UV**, the next-gen Python package manager.
 
 ---
 
 ## 🧠 How It Works
 
-**Example:**
+**Example Flow**
 
 ```
 User: "I am 30 and want 50k pension"
@@ -43,30 +43,52 @@ User: "I am 30 and want 50k pension"
 
 *(Written painlessly for you by Lakmalllllll 😎)*
 
+---
+
 ### 🧩 Prerequisites
 
 > **⚠️ Requires Python 3.10 or higher**
 
----
-
-### 🏗️ Create a virtual environment
+Make sure **UV** is installed:
 
 ```bash
-python -m venv .venv
+pip install uv
 ```
 
-### ▶️ Activate the environment
+---
 
-**Windows (Command Prompt):**
+### 🏗️ Project Setup
+
+Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/chatbot-langraph-backend.git
+cd chatbot-langraph-backend
+```
+
+---
+
+### 🪄 Install Dependencies (with UV)
+
+```bash
+uv sync
+```
+
+UV will:
+
+* Automatically create a virtual environment in `.venv/`
+* Install all dependencies from `pyproject.toml`
+* Lock versions inside `uv.lock`
+
+---
+
+### ▶️ Activate the Environment
+
+**Windows:**
 
 ```bash
 .venv\Scripts\activate
-```
-
-**Windows (PowerShell):**
-
-```bash
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
 **macOS/Linux:**
@@ -79,44 +101,49 @@ source .venv/bin/activate
 
 ### 🔑 Environment Variables
 
-> I accidentally committed the `.env` file (good for you! 😅)
-> Just open it and add the following:
+Create a `.env` file in the project root:
 
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_AI_MODEL=your_openai_mdel_name
+OPENAI_AI_MODEL=your_openai_model_name
 ```
 
 ---
 
-### 📦 Install dependencies
+### 🚀 Run the Application
 
-Using **pip**:
-
-```bash
-pip install -r requirements.txt
-```
-
-Or if you’re a **UV** fan like me:
+Start the FastAPI server with:
 
 ```bash
-uv pip install -r requirements.txt
-```
-
----
-
-### 🚀 Run the application
-
-```bash
-uvicorn main:app --reload
+uv run uvicorn main:app --reload
 ```
 
 Your app will start at:
 👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-API Docs are available at:
+API Docs:
 👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-💡 **Tip:** You can now talk to your AI agent about pensions, vehicles, or crop insurance, and watch the LangGraph nodes do their magic.
+### 🧪 Run Tests
+
+```bash
+uv run pytest
+```
+
+---
+
+### 🧰 Common UV Commands
+
+| Task                 | Command                            |
+| -------------------- | ---------------------------------- |
+| Add a new dependency | `uv add fastapi`                   |
+| Add a dev dependency | `uv add --dev pytest`              |
+| Remove a dependency  | `uv remove fastapi`                |
+| Lock dependencies    | `uv lock`                          |
+| Run a script         | `uv run python scripts/init_db.py` |
+
+---
+
+💡 **Tip:** Once running, talk to your AI assistant about pensions, vehicles, or crop insurance — and watch **LangGraph nodes** perform intent classification, entity extraction, and intelligent reasoning in real time.

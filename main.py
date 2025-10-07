@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import settings
-from api.routes.v1 import session, chat
+from app.core.config import settings
+from app.api.routes.v1 import session, chat
 
 app = FastAPI(
     title= settings.APP_NAME,

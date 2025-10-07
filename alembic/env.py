@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -10,9 +8,8 @@ from sqlalchemy import pool
 from alembic import context
 
 # Import Base and settings
-from db.connection import Base
-from models import *  # Import all models so Alembic sees them
-from core.config import settings
+from app.db.connection import Base
+from app.core.config import settings
 
 # Alembic Config object
 config = context.config
