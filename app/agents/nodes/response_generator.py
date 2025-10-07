@@ -1,10 +1,8 @@
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from agents.llm_provider import get_llm
-from agents.state import AgentState
-from core.config import settings
-from enums import AiModel
+from app.agents.llm_provider import get_llm
+from app.agents.state import AgentState
+from app.enums import AiModel
 
 
 def generate_response(state: AgentState) -> AgentState:

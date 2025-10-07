@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
-from core.config import settings
-from enums import AiModel
+from app.core.config import settings
+from app.enums import AiModel
 
 def get_llm(temperature: float = 0, provider:AiModel=AiModel.OPENAI):
     if provider == AiModel.OPENAI:

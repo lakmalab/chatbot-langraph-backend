@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime
 from sqlalchemy.sql import func
-from db.connection import Base
+from app.db.connection import Base
 
 
 class PensionCalculation(Base):

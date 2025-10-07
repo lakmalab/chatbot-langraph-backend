@@ -1,9 +1,9 @@
 import uuid
 from datetime import datetime, timedelta
 
-from core.config import settings
-from schemas.session import SessionCreate
-from models.session import Session
+from app.core.config import settings
+from app.schemas.session import SessionCreate
+from app.models.session import Session
 class SessionService:
     def __init__(self,DBSession):
         self.db = DBSession

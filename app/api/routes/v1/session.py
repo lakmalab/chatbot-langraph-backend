@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session as DBSession
-from db.connection import get_db
-from schemas.session import SessionCreate, SessionResponse
-from service.session_service import SessionService
+from app.db.connection import get_db
+from app.schemas.session import SessionCreate, SessionResponse
+from app.service.session_service import SessionService
 
 router = APIRouter(prefix="/api/v1/session", tags=["Session"])
 

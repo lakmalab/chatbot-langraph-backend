@@ -1,9 +1,9 @@
 from langgraph.graph import StateGraph, END
-from agents.state import AgentState
-from agents.nodes.intent_classifier import classify_intent
-from agents.nodes.parameter_extractor import extract_parameters
-from agents.nodes.calculator import calculate_pension
-from agents.nodes.response_generator import generate_response
+from app.agents.state import AgentState
+from app.agents.nodes.intent_classifier import classify_intent
+from app.agents.nodes.parameter_extractor import extract_parameters
+from app.agents.nodes.calculator import calculate_pension
+from app.agents.nodes.response_generator import generate_response
 
 
 def create_pension_agent():

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.sql import func
-from db.connection import Base
+from app.db.connection import Base
 
 class Session(Base):
     __tablename__ = "sessions"

@@ -1,7 +1,6 @@
-import enum
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, JSON, Enum as SQLEnum, Boolean
-from db.connection import Base
-from enums.scheme import SchemeType
+from sqlalchemy import Column, Integer, String, Text, Enum as SQLEnum, Boolean
+from app.db.connection import Base
+from app.enums.scheme import SchemeType
 
 
 class Scheme(Base):

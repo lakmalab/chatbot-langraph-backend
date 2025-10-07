@@ -1,9 +1,9 @@
 from __future__ import annotations
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from datetime import datetime
 
-from enums.scheme import SchemeType
+from app.enums.scheme import SchemeType
 
 
 class ChatMessageRequest(BaseModel):

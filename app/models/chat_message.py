@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, JSON, Enum as SQLEnum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from db.connection import Base
-from enums.role import RoleType
+from app.db.connection import Base
+from app.enums.role import RoleType
 
 
 class ChatMessage(Base):
