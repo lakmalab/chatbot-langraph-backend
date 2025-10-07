@@ -3,6 +3,10 @@ uvicorn
 uv
 langchain
 langchain-openai
+langchain-community
+langgraph
+langchain-core
+openai
 sqlalchemy
 pymysql
 python-dotenv
