@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     SESSION_EXPIRE_HOURS: int
     OPENAI_API_KEY:str
+    OPENAI_AI_MODEL:str
     API_BASE_URL: str = "http://localhost:8000"
 
     @field_validator("ALLOWED_ORIGINS")
