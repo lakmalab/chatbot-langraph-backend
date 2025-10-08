@@ -1,8 +1,10 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.core.config import settings
+from app.enums import AiModel
 
 
 def classify_intent(state: AgentState) -> AgentState:
@@ -13,12 +15,7 @@ def classify_intent(state: AgentState) -> AgentState:
     - greeting: User is greeting
     - unclear: Intent is unclear
     """
-    #llm = get_llm(AiModel.OPENAI, temperature=0)
-    llm= ChatOpenAI(
-        model=settings.OPENAI_AI_MODEL,
-        temperature=0,
-        openai_api_key=settings.OPENAI_API_KEY
-    )
+    llm = get_llm(temperature=0, provider=AiModel.OPENAI)
 
     system_prompt = """You are an intent classifier for a pension scheme chatbot.
 

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+from app.enums import RoleType
 from app.enums.scheme import SchemeType
 
 
@@ -34,7 +35,7 @@ class ConversationResponse(BaseModel):
 
 class MessageHistory(BaseModel):
     id: int
-    role: str
+    role: RoleType
     content: str
     created_at: datetime
 

@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
 
-from app.agents.graph import create_pension_agent
-from app.agents.state import AgentState
-from app.enums import RoleType, SchemeType
+from app.enums.role import RoleType
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
-
-from typing import Dict, Any
+from app.models.pension_calculation import PensionCalculation
+from app.agents.graph import create_pension_agent
+from app.agents.state import AgentState
+from typing import Dict, Any, Optional
 
 
 class ChatService:
@@ -15,13 +15,107 @@ class ChatService:
         self.db = db
         self.agent = create_pension_agent()
 
+    def get_or_create_conversation(
+            self,
+            session_id: str,
+            conversation_id: Optional[int] = None,
+            scheme_type: str = "pension"
+    ) -> Conversation:
+
+
+        if conversation_id:
+            conversation = self.db.query(Conversation).filter(
+                Conversation.id == conversation_id,
+                Conversation.session_id == session_id
+            ).first()
+
+            if conversation:
+                return conversation
+
+        latest_conversation = self.db.query(Conversation).filter(
+            Conversation.session_id == session_id
+        ).order_by(Conversation.updated_at.desc()).first()
+
+
+        if latest_conversation:
+            return latest_conversation
+
+        conversation = Conversation(
+            session_id=session_id,
+            title=f"Pension Chat - {scheme_type}"
+        )
+        self.db.add(conversation)
+        self.db.commit()
+        self.db.refresh(conversation)
+
+        return conversation
+
+    def save_message(
+            self,
+            conversation_id: int,
+            role: RoleType,
+            content: str,
+            intent: str = None,
+            metadata: Dict[str, Any] = None
+    ) -> ChatMessage:
+
+        message = ChatMessage(
+            conversation_id=conversation_id,
+            role=role,  # Pass enum directly
+            content=content,
+            intent=intent,
+            metadata=metadata
+        )
+        self.db.add(message)
+        self.db.commit()
+        self.db.refresh(message)
+
+        return message
+
+    def save_calculation(
+            self,
+            session_id: str,
+            conversation_id: int,
+            calculation_result: Dict[str, Any],
+            current_age: int,
+            desired_pension: float
+    ) -> PensionCalculation:
+
+        calc = PensionCalculation(
+            session_id=session_id,
+            conversation_id=conversation_id,
+            current_age=current_age,
+            desired_pension_amount=desired_pension,
+            monthly_contribution=calculation_result["monthly_contribution"],
+            total_contribution=calculation_result["total_contribution"]
+        )
+        self.db.add(calc)
+        self.db.commit()
+        self.db.refresh(calc)
+
+        return calc
+
+    def get_conversation_history(self, conversation_id: int) -> list:
+
+        messages = self.db.query(ChatMessage).filter(
+            ChatMessage.conversation_id == conversation_id
+        ).order_by(ChatMessage.created_at).all()
+
+        langchain_messages = []
+        for msg in messages:
+            if msg.role == RoleType.USER:
+                langchain_messages.append(HumanMessage(content=msg.content))
+            elif msg.role == RoleType.ASSISTANT:
+                langchain_messages.append(AIMessage(content=msg.content))
+
+        return langchain_messages
 
     async def process_message(
             self,
             session_id: str,
             user_message: str,
-            conversation_id: int = None,
-            scheme_type:SchemeType= SchemeType.PENSION
+            conversation_id: Optional[int] = None,
+            scheme_type: str = "pension"
     ) -> Dict[str, Any]:
 
         conversation = self.get_or_create_conversation(
@@ -29,11 +123,12 @@ class ChatService:
             conversation_id=conversation_id,
             scheme_type=scheme_type
         )
+
         history = self.get_conversation_history(conversation.id)
 
         self.save_message(
             conversation_id=conversation.id,
-            role= RoleType.USER,
+            role=RoleType.USER,  # Use enum
             content=user_message
         )
 
@@ -57,10 +152,11 @@ class ChatService:
 
         self.save_message(
             conversation_id=conversation.id,
-            role=RoleType.ASSISTANT,
+            role=RoleType.ASSISTANT,  # Use enum
             content=response_text,
             intent=intent
         )
+
         if result.get("calculation_result"):
             self.save_calculation(
                 session_id=session_id,
@@ -78,55 +174,3 @@ class ChatService:
                 "calculation_result": result.get("calculation_result")
             }
         }
-
-    def get_or_create_conversation(self, session_id, conversation_id, scheme_type):
-        if conversation_id:
-            conversation = self.db.query(Conversation).filter(
-                Conversation.id == conversation_id,
-                Conversation.session_id == session_id
-            ).first()
-
-            if conversation:
-                return conversation
-
-        conversation = Conversation(
-            session_id=session_id,
-            title=f" AAIB Assistant - {scheme_type}"
-        )
-        self.db.add(conversation)
-        self.db.commit()
-        self.db.refresh(conversation)
-
-        return conversation
-
-    def get_conversation_history(self, conversation_id: int) -> list:
-        messages = self.db.query(ChatMessage).filter(
-            ChatMessage.conversation_id == conversation_id
-        ).order_by(ChatMessage.created_at).all()
-
-        return [
-            HumanMessage(content=msg.content) if msg.role == RoleType.USER else AIMessage(content=msg.content)
-            for msg in messages
-        ]
-
-    def save_message(
-            self,
-            conversation_id: int,
-            role: RoleType,
-            content: str,
-            intent: str = None,
-            metadata: Dict[str, Any] = None
-    ) -> ChatMessage:
-
-        message = ChatMessage(
-            conversation_id=conversation_id,
-            role=role,
-            content=content,
-            intent=intent,
-            metadata=metadata
-        )
-        self.db.add(message)
-        self.db.commit()
-        self.db.refresh(message)
-
-        return message
