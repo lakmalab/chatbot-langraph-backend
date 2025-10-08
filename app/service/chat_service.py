@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
-
 from app.enums.role import RoleType
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
@@ -13,7 +12,7 @@ from typing import Dict, Any, Optional
 class ChatService:
     def __init__(self, db: DBSession):
         self.db = db
-        self.agent = create_pension_agent()
+        self.agent = create_pension_agent(db)
 
     def get_or_create_conversation(
             self,
@@ -21,7 +20,6 @@ class ChatService:
             conversation_id: Optional[int] = None,
             scheme_type: str = "pension"
     ) -> Conversation:
-
 
         if conversation_id:
             conversation = self.db.query(Conversation).filter(
@@ -35,7 +33,6 @@ class ChatService:
         latest_conversation = self.db.query(Conversation).filter(
             Conversation.session_id == session_id
         ).order_by(Conversation.updated_at.desc()).first()
-
 
         if latest_conversation:
             return latest_conversation
@@ -61,7 +58,7 @@ class ChatService:
 
         message = ChatMessage(
             conversation_id=conversation_id,
-            role=role,  # Pass enum directly
+            role=role,
             content=content,
             intent=intent,
             metadata=metadata
@@ -86,8 +83,8 @@ class ChatService:
             conversation_id=conversation_id,
             current_age=current_age,
             desired_pension_amount=desired_pension,
-            monthly_contribution=calculation_result["monthly_contribution"],
-            total_contribution=calculation_result["total_contribution"]
+            monthly_contribution=calculation_result.get("monthly_premium", 0),
+            total_contribution=calculation_result.get("total_contribution", 0)
         )
         self.db.add(calc)
         self.db.commit()
@@ -128,7 +125,7 @@ class ChatService:
 
         self.save_message(
             conversation_id=conversation.id,
-            role=RoleType.USER,  # Use enum
+            role=RoleType.USER,
             content=user_message
         )
 
@@ -140,7 +137,9 @@ class ChatService:
             "intent": None,
             "current_age": None,
             "desired_pension": None,
+            "monthly_premium": None,
             "calculation_result": None,
+            "tool_results": None,
             "response": "",
             "next_action": None
         }
@@ -152,25 +151,28 @@ class ChatService:
 
         self.save_message(
             conversation_id=conversation.id,
-            role=RoleType.ASSISTANT,  # Use enum
+            role=RoleType.ASSISTANT,
             content=response_text,
             intent=intent
         )
 
         if result.get("calculation_result"):
-            self.save_calculation(
-                session_id=session_id,
-                conversation_id=conversation.id,
-                calculation_result=result["calculation_result"],
-                current_age=result["current_age"],
-                desired_pension=result["desired_pension"]
-            )
+            calc_result = result["calculation_result"]
+            if "error" not in calc_result:
+                self.save_calculation(
+                    session_id=session_id,
+                    conversation_id=conversation.id,
+                    calculation_result=calc_result,
+                    current_age=calc_result.get("current_age", result.get("current_age")),
+                    desired_pension=calc_result.get("pension_breakdown", {}).get("60-63", result.get("desired_pension"))
+                )
 
         return {
             "conversation_id": conversation.id,
             "response": response_text,
             "intent": intent,
             "metadata": {
-                "calculation_result": result.get("calculation_result")
+                "calculation_result": result.get("calculation_result"),
+                "tool_results": result.get("tool_results")
             }
         }
