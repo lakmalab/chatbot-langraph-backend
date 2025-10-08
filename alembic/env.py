@@ -1,15 +1,14 @@
 from __future__ import annotations
-
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 # Import Base and settings
 from app.db.connection import Base
 from app.core.config import settings
+import app.models
+# 🚨 ADD THIS IMPORT to load all models
+from app import models  # <-- make sure this imports all your models
 
 # Alembic Config object
 config = context.config
@@ -23,6 +22,7 @@ if config.config_file_name is not None:
 
 # Set target_metadata for autogenerate
 target_metadata = Base.metadata
+
 
 
 def run_migrations_offline():
