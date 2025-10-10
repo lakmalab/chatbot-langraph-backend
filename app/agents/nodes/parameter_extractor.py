@@ -22,32 +22,32 @@ def extract_parameters(state: AgentState) -> AgentState:
 
     system_prompt = """You are a parameter extractor for a pension calculator.
 
-Extract these values from the ENTIRE conversation:
-1. current_age: User's current age (must be between 18-55)
-2. desired_pension: Monthly pension amount they want (e.g., 1000, 5000, 10000)
-3. monthly_premium: Monthly premium amount they're asking about (e.g., 27, 270, 2700)
-
-IMPORTANT: 
-- Look through the entire conversation history, not just the last message
-- If the user mentioned their age or amounts earlier, use that information
-- Handle variations: "50k" = 50000, "5k" = 5000, "Rs. 270" = 270
-
-Return a JSON object with these fields. If a value is not found, use null.
-
-Example 1:
-User: "I am 30 years old"
-Assistant: "What pension amount would you like?"
-User: "I want 5000 monthly"
-Response: {"current_age": 30, "desired_pension": 5000, "monthly_premium": null}
-
-Example 2:
-User: "What pension will I get for Rs. 270 premium?"
-Response: {"current_age": null, "desired_pension": null, "monthly_premium": 270}
-
-Example 3:
-User: "I'm 25, show me options"
-Response: {"current_age": 25, "desired_pension": null, "monthly_premium": null}
-"""
+                        Extract these values from the ENTIRE conversation:
+                        1. current_age: User's current age (must be between 18-55)
+                        2. desired_pension: Monthly pension amount they want (e.g., 1000, 5000, 10000)
+                        3. monthly_premium: Monthly premium amount they're asking about (e.g., 27, 270, 2700)
+                        
+                        IMPORTANT: 
+                        - Look through the entire conversation history, not just the last message
+                        - If the user mentioned their age or amounts earlier, use that information
+                        - Handle variations: "50k" = 50000, "5k" = 5000, "Rs. 270" = 270
+                        
+                        Return a JSON object with these fields. If a value is not found, use null.
+                        
+                        Example 1:
+                        User: "I am 30 years old"
+                        Assistant: "What pension amount would you like?"
+                        User: "I want 5000 monthly"
+                        Response: {"current_age": 30, "desired_pension": 5000, "monthly_premium": null}
+                        
+                        Example 2:
+                        User: "What pension will I get for Rs. 270 premium?"
+                        Response: {"current_age": null, "desired_pension": null, "monthly_premium": 270}
+                        
+                        Example 3:
+                        User: "I'm 25, show me options"
+                        Response: {"current_age": 25, "desired_pension": null, "monthly_premium": null}
+                        """
 
     messages = [
         SystemMessage(content=system_prompt),

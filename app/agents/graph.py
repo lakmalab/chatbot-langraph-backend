@@ -8,16 +8,16 @@ from app.agents.nodes.response_generator import generate_response
 
 def create_pension_agent(db):
 
-    from app.agents.tools.pension_tools import PensionTools
+    from app.agents.tools import pension_tools
 
-    pension_tools_instance = PensionTools(db)
+    pension_tools.set_db_session(db)
+
     tools = [
-        pension_tools_instance.get_available_plans,
-        pension_tools_instance.calculate_premium_by_age,
-        pension_tools_instance.get_pension_for_premium,
-        pension_tools_instance.compare_plans_for_age
+        pension_tools.get_available_plans,
+        pension_tools.calculate_premium_by_age,
+        pension_tools.get_pension_for_premium,
+        pension_tools.compare_plans_for_age
     ]
-
 
     workflow = StateGraph(AgentState)
 
@@ -26,7 +26,6 @@ def create_pension_agent(db):
     workflow.add_node("call_tools", lambda state: call_tools(state, tools))
     workflow.add_node("generate_response", generate_response)
 
-    # Define routing logic
     def route_after_intent(state: AgentState) -> str:
         intent = state.get("intent")
 
@@ -67,5 +66,7 @@ def create_pension_agent(db):
     workflow.add_edge("generate_response", END)
 
     app = workflow.compile()
+    #graph_image = app.get_graph().draw_png()
+    #graph_image.save("agent_workflow.png")
 
     return app

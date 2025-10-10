@@ -16,43 +16,42 @@ def generate_response(state: AgentState) -> AgentState:
     intent = state.get("intent")
     tool_results = state.get("tool_results", [])
 
-
     if intent == "greeting":
         state["response"] = """Hello! Welcome to the Agricultural and Agrarian Insurance Board Farmers Pension Scheme. 🌾
 
-This scheme offers:
-✅ Fixed monthly premiums starting from Rs. 27
-✅ Guaranteed pension from age 60
-✅ Higher pension amounts as you age (60-63, 64-70, 71-77, 78+ years)
-✅ Entry age: 18 to 55 years
-
-I can help you:
-1. Calculate required premium based on your age and desired pension
-2. Show available pension plans
-3. Compare options for your age
-4. Answer questions about the scheme
-
-What would you like to know?"""
+                            This scheme offers:
+                            ✅ Fixed monthly premiums starting from Rs. 27
+                            ✅ Guaranteed pension from age 60
+                            ✅ Higher pension amounts as you age (60-63, 64-70, 71-77, 78+ years)
+                            ✅ Entry age: 18 to 55 years
+                            
+                            I can help you:
+                            1. Calculate required premium based on your age and desired pension
+                            2. Show available pension plans
+                            3. Compare options for your age
+                            4. Answer questions about the scheme
+                            
+                            What would you like to know?"""
         return state
 
 
     if tool_results:
         system_prompt = """You are a helpful pension scheme assistant for farmers.
 
-The scheme offers FIXED monthly premiums with GUARANTEED pension amounts.
-Key features:
-- Entry age: 18-55 years
-- Pension starts at age 60
-- Four pension periods: 60-63, 64-70, 71-77, 78+ (increasing amounts)
-- Lower premium if you join younger
-
-Format tool results clearly:
-- Show monthly premium prominently
-- Explain pension amounts for different age brackets
-- Calculate total contribution (premium × 12 months × years)
-- Be encouraging and helpful
-
-Use rupee symbol (Rs.) and format numbers with commas for readability."""
+                            The scheme offers FIXED monthly premiums with GUARANTEED pension amounts.
+                            Key features:
+                            - Entry age: 18-55 years
+                            - Pension starts at age 60
+                            - Four pension periods: 60-63, 64-70, 71-77, 78+ (increasing amounts)
+                            - Lower premium if you join younger
+                            
+                            Format tool results clearly:
+                            - Show monthly premium prominently
+                            - Explain pension amounts for different age brackets
+                            - Calculate total contribution (premium × 12 months × years)
+                            - Be encouraging and helpful
+                            
+                            Use rupee symbol (Rs.) and format numbers with commas for readability."""
 
         tool_results_text = json.dumps(tool_results, indent=2)
 
@@ -75,15 +74,14 @@ Use rupee symbol (Rs.) and format numbers with commas for readability."""
 
         return state
 
-    # Handle unclear intent
     state["response"] = """I'm here to help with the Farmers Pension Scheme! 
 
-I can assist you with:
-1. **Calculate premium** - "I'm 30 years old and want 5000 pension"
-2. **View plans** - "What plans are available?"
-3. **Compare options** - "Compare plans for my age"
-4. **Ask questions** - About eligibility, benefits, etc.
+                            I can assist you with:
+                            1. **Calculate premium** - "I'm 30 years old and want 5000 pension"
+                            2. **View plans** - "What plans are available?"
+                            3. **Compare options** - "Compare plans for my age"
+                            4. **Ask questions** - About eligibility, benefits, etc.
 
-What would you like to know?"""
+                            What would you like to know?"""
 
     return state
