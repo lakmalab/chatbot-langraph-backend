@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # LangGraph Agentic AI Chat Assistant
 
 An intelligent **Agentic AI Chat Assistant** powered by **LangGraph + FastAPI**, designed to classify user intent, extract key data, and perform dynamic calculations such as **pension or insurance estimation** — all managed seamlessly using **UV**, the next-gen Python package manager.
@@ -133,6 +134,12 @@ uv run pytest
 ```
 
 ---
+###alembic commands
+alembic revision --autogenerate -m "initial migration"
+alembic upgrade head 
+alembic revision --autogenerate -m "create new pension scheme tables"
+alembic upgrade head 
+-----
 
 ### 🧰 Common UV Commands
 
@@ -147,3 +154,6 @@ uv run pytest
 ---
 
 💡 **Tip:** Once running, talk to your AI assistant about pensions, vehicles, or crop insurance — and watch **LangGraph nodes** perform intent classification, entity extraction, and intelligent reasoning in real time.
+=======
+# chatbot-langraph-backend
+>>>>>>> 7d330e0 (Initial commit)

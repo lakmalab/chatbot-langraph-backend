@@ -1,8 +1,8 @@
-"""create sessions table
+"""create new pensiopremiumen scheme tables
 
-Revision ID: f729715599b2
-Revises: 
-Create Date: 2025-10-05 09:58:20.636162
+Revision ID: e4a54d696fb9
+Revises: 3dc5c070dd11
+Create Date: 2025-10-10 10:08:16.145211
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f729715599b2'
-down_revision: Union[str, None] = None
+revision: str = 'e4a54d696fb9'
+down_revision: Union[str, None] = '3dc5c070dd11'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

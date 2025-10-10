@@ -7,9 +7,6 @@ from typing import Optional
 class SessionCreate(BaseModel):
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
-
-
-
 class SessionResponse(BaseModel):
     id: int
     session_id: str

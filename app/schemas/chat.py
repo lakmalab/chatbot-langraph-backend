@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+from app.enums import RoleType
 from app.enums.scheme import SchemeType
 
 
@@ -11,7 +12,6 @@ class ChatMessageRequest(BaseModel):
     message: str
     conversation_id: Optional[int] = None
     scheme_type: SchemeType
-    #scheme_type: SchemeType = SchemeType.PENSION
 
 
 class ChatMessageResponse(BaseModel):
@@ -34,7 +34,7 @@ class ConversationResponse(BaseModel):
 
 class MessageHistory(BaseModel):
     id: int
-    role: str
+    role: RoleType
     content: str
     created_at: datetime
 
