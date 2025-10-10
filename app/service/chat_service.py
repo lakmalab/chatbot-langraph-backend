@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
+from fastapi import Depends
+from app.db.connection import get_db
+from app.enums import SchemeType
 from app.enums.role import RoleType
+from app.models import Session
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
 from app.agents.graph import create_pension_agent
@@ -16,8 +20,8 @@ class ChatService:
     def get_or_create_conversation(
             self,
             session_id: str,
-            conversation_id: Optional[int] = None,
-            scheme_type: str = "pension"
+            scheme_type: SchemeType,
+            conversation_id: Optional[int] = None
     ) -> Conversation:
 
         if conversation_id:
@@ -40,6 +44,7 @@ class ChatService:
             session_id=session_id,
             title=f"Pension Chat - {scheme_type}"
         )
+
         self.db.add(conversation)
         self.db.commit()
         self.db.refresh(conversation)
@@ -88,7 +93,7 @@ class ChatService:
             session_id: str,
             user_message: str,
             conversation_id: Optional[int] = None,
-            scheme_type: str = "pension"
+            scheme_type: SchemeType = SchemeType.PENSION # TODO: lakmal bro remove this if youy ever decide to support multiple scheme types
     ) -> Dict[str, Any]:
 
         conversation = self.get_or_create_conversation(
@@ -141,3 +146,5 @@ class ChatService:
                 "tool_results": result.get("tool_results")
             }
         }
+def get_chat_service(db: Session = Depends(get_db)) -> ChatService:
+    return ChatService(db)

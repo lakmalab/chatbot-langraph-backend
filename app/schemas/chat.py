@@ -12,7 +12,6 @@ class ChatMessageRequest(BaseModel):
     message: str
     conversation_id: Optional[int] = None
     scheme_type: SchemeType
-    #scheme_type: SchemeType = SchemeType.PENSION
 
 
 class ChatMessageResponse(BaseModel):
