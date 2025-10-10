@@ -16,11 +16,8 @@ class PensionPremium(Base):
 
     def __repr__(self):
         return (
-            f"<PensionEntryAge(id={self.id}, "
-            f"entry_age={self.entry_age}, "
-            f"monthly_premium={self.monthly_premium}, "
-            f"num_of_monthly_installments={self.num_of_monthly_installments}, "
-            f"semi_annual_premium={self.semi_annual_premium}, "
-            f"num_of_semi_annual_installments={self.num_of_semi_annual_installments}, "
-            f"lump_sum_payment={self.lump_sum_payment})>"
+            f"<PensionPremium(entry_age={self.entry_age}, "
+            f"monthly={self.monthly_premium}, "
+            f"semi_annual={self.semi_annual_premium}, "
+            f"lump_sum={self.lump_sum_payment})>"
         )

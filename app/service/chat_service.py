@@ -3,7 +3,6 @@ from langchain_core.messages import HumanMessage, AIMessage
 from app.enums.role import RoleType
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
-from app.models.pension_calculation import PensionCalculation
 from app.agents.graph import create_pension_agent
 from app.agents.state import AgentState
 from typing import Dict, Any, Optional
@@ -69,29 +68,6 @@ class ChatService:
 
         return message
 
-    def save_calculation(
-            self,
-            session_id: str,
-            conversation_id: int,
-            calculation_result: Dict[str, Any],
-            current_age: int,
-            desired_pension: float
-    ) -> PensionCalculation:
-
-        calc = PensionCalculation(
-            session_id=session_id,
-            conversation_id=conversation_id,
-            current_age=current_age,
-            desired_pension_amount=desired_pension,
-            monthly_contribution=calculation_result.get("monthly_premium", 0),
-            total_contribution=calculation_result.get("total_contribution", 0)
-        )
-        self.db.add(calc)
-        self.db.commit()
-        self.db.refresh(calc)
-
-        return calc
-
     def get_conversation_history(self, conversation_id: int) -> list:
 
         messages = self.db.query(ChatMessage).filter(
@@ -155,17 +131,6 @@ class ChatService:
             content=response_text,
             intent=intent
         )
-
-        if result.get("calculation_result"):
-            calc_result = result["calculation_result"]
-            if "error" not in calc_result:
-                self.save_calculation(
-                    session_id=session_id,
-                    conversation_id=conversation.id,
-                    calculation_result=calc_result,
-                    current_age=calc_result.get("current_age", result.get("current_age")),
-                    desired_pension=calc_result.get("pension_breakdown", {}).get("60-63", result.get("desired_pension"))
-                )
 
         return {
             "conversation_id": conversation.id,

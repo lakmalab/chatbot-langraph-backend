@@ -14,6 +14,7 @@ async def send_message(
 ):
 
     session_service = SessionService(db)
+    
     if not session_service.is_session_valid(request.session_id):
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 

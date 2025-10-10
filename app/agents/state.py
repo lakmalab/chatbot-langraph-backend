@@ -1,4 +1,3 @@
-# app/agents/state.py
 from typing import TypedDict, List, Optional, Dict, Any
 from langchain_core.messages import BaseMessage
 
@@ -15,10 +14,12 @@ class AgentState(TypedDict):
 
     current_age: Optional[int]
     desired_pension: Optional[float]
-    monthly_premium: Optional[float]
-    calculation_result: Optional[dict]
+    payment_method: Optional[str]
+
+    missing_info: Optional[List[str]]
 
     tool_results: Optional[List[Dict[str, Any]]]
+    calculation_result: Optional[dict]
 
     response: str
     next_action: Optional[str]
