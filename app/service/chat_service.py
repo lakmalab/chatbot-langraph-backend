@@ -120,6 +120,7 @@ class ChatService:
             "desired_pension": None,
             "monthly_premium": None,
             "calculation_result": None,
+            "generated_sql": None,
             "tool_results": None,
             "response": "",
             "next_action": None
