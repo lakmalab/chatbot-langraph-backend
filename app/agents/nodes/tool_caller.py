@@ -62,7 +62,7 @@ def call_tools(state: AgentState, tools: list) -> AgentState:
             tool_func = next((t for t in tools if t.name == tool_call["name"]), None)
             if tool_func:
                 try:
-                    print(f"Calling tool: {tool_call['name']} with args: {tool_call['args']}")
+                    print(f"🔧 Calling tool: {tool_call['name']} with args: {tool_call['args']}")
 
                     result = tool_func.invoke(tool_call["args"])
                     tool_results.append({
@@ -77,7 +77,7 @@ def call_tools(state: AgentState, tools: list) -> AgentState:
                         state["desired_pension"] = result.get("pension_breakdown", {}).get("60-63")
 
                 except Exception as e:
-                    print(f" Tool error: {e}")
+                    print(f"❌ Tool error: {e}")
                     tool_results.append({
                         "tool": tool_call["name"],
                         "error": str(e)

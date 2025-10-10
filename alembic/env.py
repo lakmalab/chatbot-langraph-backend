@@ -3,24 +3,22 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# Import Base and settings
+
 from app.db.connection import Base
 from app.core.config import settings
 import app.models
-# 🚨 ADD THIS IMPORT to load all models
-from app import models  # <-- make sure this imports all your models
 
-# Alembic Config object
+
 config = context.config
 
-# Set database URL dynamically
+
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
-# Interpret the config file for Python logging.
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set target_metadata for autogenerate
+
 target_metadata = Base.metadata
 
 
@@ -45,6 +43,7 @@ def run_migrations_online():
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+
     )
 
     with connectable.connect() as connection:

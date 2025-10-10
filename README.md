@@ -134,6 +134,12 @@ uv run pytest
 ```
 
 ---
+###alembic commands
+alembic revision --autogenerate -m "initial migration"
+alembic upgrade head 
+alembic revision --autogenerate -m "create new pension scheme tables"
+alembic upgrade head 
+-----
 
 ### 🧰 Common UV Commands
 
