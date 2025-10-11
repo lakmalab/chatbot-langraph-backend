@@ -15,6 +15,7 @@ class AgentState(TypedDict):
     payment_method: Optional[str]
 
     missing_info: bool
+    generated_sql: Optional[str]
 
     response: str
     next_action: Optional[str]

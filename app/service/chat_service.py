@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 class ChatService:
     def __init__(self, db: DBSession):
         self.db = db
-        self.agent = build_graph(db)
+        self.agent = build_graph()
 
     def get_or_create_conversation(
             self,
@@ -122,6 +122,7 @@ class ChatService:
             "calculation_result": None,
             "generated_sql": None,
             "tool_results": None,
+            "missing_info": True,
             "response": "",
             "next_action": None
         }

@@ -8,22 +8,18 @@ from app.enums import AiModel
 
 
 def classify_intent(state: AgentState) -> AgentState:
-
-
     llm = get_llm(temperature=0, provider=AiModel.OPENAI)
 
     system_prompt = """You are an intent classifier for a pension scheme chatbot.
 
                     Classify the user's message into ONE of these categories:
-                    
+                     - "calculate": look at the last messages and if its about calculating pension give this category priority a User wants to calculate premium or pension amount
+                      Examples: "I'm 30 and want 5000 pension", "How much to pay for 10k pension?", "i'm 27", "years old", "monthly", "semi_annual", "lump_sum",
+                      "Calculate my premium"
+                      
                      - "greeting": User is greeting or starting conversation
                       Examples: "Hello", "Hi", "Good morning"
                       
-                    - "calculate": User wants to calculate premium or pension amount
-                      Examples: "I'm 30 and want 5000 pension", "How much to pay for 10k pension?", 
-                      "Calculate my premium"
-        
-                    
                     - "question": User has questions about the scheme, eligibility, rules, benefits
                       Examples: "What is the eligibility?", "How does the scheme work?", 
                       "What pension will I get?"
