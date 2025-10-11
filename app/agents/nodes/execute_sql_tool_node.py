@@ -1,49 +1,33 @@
-from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
-from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.agents.tools.execute_dynamic_sql_query import execute_dynamic_sql_query
-from app.enums import AiModel
-
 
 def execute_sql_tool_node(state: AgentState) -> AgentState:
 
-    llm = get_llm(temperature=0, provider=AiModel.OPENAI)
-
-    generated_sql = state.get("generated_sql")
-
-    if not generated_sql:
-        state["response"] = "No SQL query was generated. Please try again."
-        state["tool_results"] = None
+    sql = state.get("generated_sql")
+    if not sql:
+        state["response"] = "No SQL query was generated."
+        state["tool_results"] = ""
         return state
 
-    tool_result = execute_dynamic_sql_query.invoke({
-        "sql_query": generated_sql
-    })
+    result = execute_dynamic_sql_query.invoke({"sql_query": sql})
+    state["tool_results"] = result
 
-    state["tool_results"] = tool_result
-
-    if tool_result["success"]:
-        if "data" in tool_result and tool_result["data"]:
-            data = tool_result["data"]
-            if len(data) == 1:
-                result_text = "Here are the results:\n"
-                for key, value in data[0].items():
-                    result_text += f"- {key}: {value}\n"
-            else:
-                result_text = f"Found {len(data)} results:\n"
-                for i, row in enumerate(data[:5], 1):
-                    result_text += f"\nResult {i}:\n"
-                    for key, value in row.items():
-                        result_text += f"  - {key}: {value}\n"
-
-                if len(data) > 5:
-                    result_text += f"\n... and {len(data) - 5} more results"
+    if result["success"]:
+        data = result.get("data", [])
+        if not data:
+            state["response"] = "Query ran successfully but returned no results."
+        elif len(data) == 1:
+            row = data[0]
+            state["response"] = "Result:\n" + "\n".join(f"- {k}: {v}" for k, v in row.items())
         else:
-            result_text = "Query executed successfully."
+            text = f"Found {len(data)} results (showing first 5):\n"
+            for i, row in enumerate(data[:5], 1):
+                text += f"\nResult {i}:\n" + "\n".join(f"  - {k}: {v}" for k, v in row.items())
+            if len(data) > 5:
+                text += f"\n...and {len(data) - 5} more results"
+            state["response"] = text
     else:
-        result_text = f"Error executing query: {tool_result['error']}"
+        state["response"] = f"Error executing query: {result['error']}"
 
-    state["response"] = result_text
-    print(f"SQL Execution Results: {tool_result}")
-
+    print(f"SQL Execution Results: {result}")
     return state

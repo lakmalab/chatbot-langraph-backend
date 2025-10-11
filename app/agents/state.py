@@ -19,5 +19,5 @@ class AgentState(TypedDict):
 
     tool_results: str
 
-    response: List[str]
+    response: str
     next_action: Optional[str]

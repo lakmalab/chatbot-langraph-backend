@@ -6,7 +6,6 @@ from app.enums import AiModel
 
 
 def generate_conversational_response(state: AgentState) -> AgentState:
-
     llm = get_llm(temperature=0, provider=AiModel.OPENAI)
 
     intent = state.get("intent")

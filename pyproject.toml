@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.16.5",
     "cryptography>=46.0.2",
     "fastapi[all]>=0.100.0",
+    "ipython>=9.6.0",
     "langchain>=0.3.27",
     "langchain-community>=0.3.30",
     "langchain-core>=0.3.77",

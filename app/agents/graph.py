@@ -6,7 +6,7 @@ from app.agents.nodes.gather_user_info import gather_user_info
 from app.agents.nodes.intent_classifier import classify_intent
 from app.agents.state import AgentState
 from app.agents.nodes.sql_query_generate_tool import generate_sql_query
-
+from IPython.display import Image, display
 
 def build_graph():
 
@@ -58,5 +58,15 @@ def build_graph():
 
     workflow.add_edge("generate_sql_query", "execute_sql_tool_node")
     workflow.add_edge("execute_sql_tool_node", END)
+
+    '''
+        compiled_graph = workflow.compile()
+        image_bytes = compiled_graph.get_graph().draw_mermaid_png()
+        with open("agent_workflow_graph.png", "wb") as f:
+            f.write(image_bytes)
+        print("Graph saved as 'agent_workflow_graph.png'")
+        from IPython.display import Image, display
+        display(Image(image_bytes))
+    '''
 
     return workflow.compile()

@@ -40,6 +40,5 @@ def classify_intent(state: AgentState) -> AgentState:
         intent = "unclear"
 
     state["intent"] = intent
-
     print(f"Classified intent: {intent}")
     return state
