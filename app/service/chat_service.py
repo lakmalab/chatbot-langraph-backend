@@ -115,6 +115,7 @@ class ChatService:
             "user_query": user_message,
             "session_id": session_id,
             "conversation_id": conversation.id,
+            "intent": None,
             "current_age": None,
             "desired_pension": None,
             "monthly_premium": None,
@@ -146,5 +147,5 @@ class ChatService:
                 "tool_results": result.get("tool_results")
             }
         }
-def get_chat_service(db: Session = Depends(get_db)) -> ChatService:
+def get_chat_service(db: DBSession = Depends(get_db)) -> ChatService:
     return ChatService(db)
