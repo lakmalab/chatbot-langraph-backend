@@ -17,5 +17,7 @@ class AgentState(TypedDict):
     missing_info: bool
     generated_sql: Optional[str]
 
-    response: str
+    tool_results: str
+
+    response: List[str]
     next_action: Optional[str]
