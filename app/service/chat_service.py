@@ -7,7 +7,7 @@ from app.enums.role import RoleType
 from app.models import Session
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
-from app.agents.graph import create_pension_agent
+from app.agents.graph import build_graph
 from app.agents.state import AgentState
 from typing import Dict, Any, Optional
 
@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 class ChatService:
     def __init__(self, db: DBSession):
         self.db = db
-        self.agent = create_pension_agent(db)
+        self.agent = build_graph(db)
 
     def get_or_create_conversation(
             self,
@@ -115,7 +115,6 @@ class ChatService:
             "user_query": user_message,
             "session_id": session_id,
             "conversation_id": conversation.id,
-            "intent": None,
             "current_age": None,
             "desired_pension": None,
             "monthly_premium": None,
