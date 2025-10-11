@@ -22,10 +22,7 @@ def classify_intent(state: AgentState) -> AgentState:
                     - "calculate": User wants to calculate premium or pension amount
                       Examples: "I'm 30 and want 5000 pension", "How much to pay for 10k pension?", 
                       "Calculate my premium"
-                    
-                    - "compare": User wants to compare different plans or see options
-                      Examples: "Show me all options", "Compare plans", "What are my choices?", 
-                      "Show plans for my age"
+        
                     
                     - "question": User has questions about the scheme, eligibility, rules, benefits
                       Examples: "What is the eligibility?", "How does the scheme work?", 
@@ -41,7 +38,7 @@ def classify_intent(state: AgentState) -> AgentState:
     response = llm.invoke(messages)
     intent = response.content.strip().lower()
 
-    valid_intents = ["calculate", "compare", "question", "greeting", "unclear"]
+    valid_intents = ["calculate", "question", "greeting", "unclear"]
 
     if intent not in valid_intents:
         intent = "unclear"
