@@ -14,7 +14,7 @@ class AgentState(TypedDict):
     desired_pension: Optional[float]
     payment_method: Optional[str]
 
-    missing_info: Optional[List[str]]
+    missing_info: bool
 
     response: str
     next_action: Optional[str]
