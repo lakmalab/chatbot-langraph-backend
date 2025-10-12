@@ -9,17 +9,15 @@ class AgentState(TypedDict):
 
     session_id: str
     conversation_id: Optional[int]
-
     intent: Optional[str]
-
     current_age: Optional[int]
     desired_pension: Optional[float]
     payment_method: Optional[str]
 
-    missing_info: Optional[List[str]]
+    missing_info: bool
+    generated_sql: Optional[str]
 
-    tool_results: Optional[List[Dict[str, Any]]]
-    calculation_result: Optional[dict]
+    tool_results: str
 
     response: str
     next_action: Optional[str]

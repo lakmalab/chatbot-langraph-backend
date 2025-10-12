@@ -4,14 +4,15 @@ from app.db.connection import get_db
 from app.schemas.chat import ChatMessageRequest, ChatMessageResponse
 from app.service.chat_service import ChatService
 from app.service.session_service import SessionService, get_session_service
+from app.service.chat_service import get_chat_service
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
 
 @router.post("/message", response_model=ChatMessageResponse)
 async def send_message(
         request: ChatMessageRequest,
-        chat_service: ChatService = Depends(ChatService),
-        session_service: SessionService = Depends(get_session_service)
+        chat_service: ChatService = Depends(get_chat_service),
+        session_service: SessionService = Depends(get_session_service),
 ):
     if not session_service.is_session_valid(request.session_id):
         raise HTTPException(status_code=401, detail="Invalid or expired session")
