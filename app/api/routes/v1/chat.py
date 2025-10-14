@@ -28,3 +28,27 @@ async def send_message(
     return ChatMessageResponse(**result)
 
 
+@router.get("/history/{conversation_id}")
+async def get_chat_history(
+        conversation_id: int,
+        db: DBSession = Depends(get_db)
+):
+    from app.models.chat_message import ChatMessage
+
+    messages = db.query(ChatMessage).filter(
+        ChatMessage.conversation_id == conversation_id
+    ).order_by(ChatMessage.created_at).all()
+
+    return {
+        "conversation_id": conversation_id,
+        "messages": [
+            {
+                "id": msg.id,
+                "role": msg.role,
+                "content": msg.content,
+                "intent": msg.intent,
+                "created_at": msg.created_at
+            }
+            for msg in messages
+        ]
+    }
