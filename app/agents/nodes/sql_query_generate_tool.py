@@ -1,8 +1,6 @@
 from typing import Dict, Any
 from langchain_core.tools import tool
-
 from langchain_core.messages import HumanMessage, SystemMessage
-
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -90,7 +88,8 @@ def generate_sql_query(state: AgentState) -> AgentState:
                              END
 
                         **Response Format:**
-                        Return ONLY the SQL query, nothing else. No explanations, no markdown, just the query."""
+                        Return ONLY the SQL query, nothing else. No explanations, no markdown, just the query.
+                    """
 
     messages = [
         SystemMessage(content=system_prompt),

@@ -20,10 +20,11 @@ class Settings(BaseSettings):
     OPENAI_AI_MODEL:str
     API_BASE_URL: str = "http://localhost:8000"
 
+    '''
     @field_validator("ALLOWED_ORIGINS")
     def parse_allowed_origins(cls, v: str) -> list[str]:
         return v.split(",") if v else []
-
+    '''
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
