@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from fastapi import Depends
 from app.core.config import settings
 from app.db.connection import get_db
+from app.models import Conversation
 from app.schemas.session import SessionCreate
 from app.models.session import Session
 
@@ -13,9 +14,33 @@ class SessionService:
     def create_session(self, ip_address: str, user_agent: str) -> Session:
         existing_session = self.db.query(Session).filter(Session.ip_address == ip_address).order_by(Session.expires_at.desc()).first()
 
-        if existing_session:
-            if existing_session.expires_at and existing_session.expires_at > datetime.utcnow():
-                return existing_session
+        existing_session = (
+            self.db.query(Session)
+            .filter(Session.ip_address == ip_address)
+            .order_by(Session.expires_at.desc())
+            .first()
+        )
+
+        if existing_session and existing_session.expires_at > datetime.utcnow():
+            # 2️⃣ Check if conversation exists for this session
+            conversation = (
+                self.db.query(Conversation)
+                .filter(Conversation.session_id == existing_session.session_id)
+                .first()
+            )
+
+            # 3️⃣ If no conversation exists, create one
+            if not conversation:
+                new_conversation = Conversation(
+                    session_id=existing_session.session_id,
+                    title="New Conversation"
+                )
+                self.db.add(new_conversation)
+                self.db.commit()
+                self.db.refresh(new_conversation)
+
+            # ✅ Return the existing valid session
+            return existing_session
 
         session_data = SessionCreate(
             ip_address=ip_address,
@@ -34,6 +59,15 @@ class SessionService:
         self.db.add(new_session)
         self.db.commit()
         self.db.refresh(new_session)
+
+        new_conversation = Conversation(
+            session_id=new_session.session_id,
+            title="New Conversation"
+        )
+        self.db.add(new_conversation)
+        self.db.commit()
+        self.db.refresh(new_conversation)
+
         return new_session
 
     def is_session_valid(self, session_id: str) -> bool:
