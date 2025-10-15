@@ -6,6 +6,7 @@ from app.service.chat_service import ChatService
 from app.service.session_service import SessionService, get_session_service
 from app.service.chat_service import get_chat_service
 from app.models.chat_message import ChatMessage
+from app.models.conversation import Conversation
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
 
@@ -48,5 +49,26 @@ async def get_chat_history(
                 "created_at": msg.created_at
             }
             for msg in messages
+        ]
+    }
+@router.get("/conversations/{session_id}")
+async def get_user_conversations(
+        session_id: str,
+        db: DBSession = Depends(get_db)
+):
+    conversations = db.query(Conversation).filter(
+        Conversation.session_id == session_id
+    ).order_by(Conversation.updated_at.desc()).all()
+
+    return {
+        "session_id": session_id,
+        "conversations": [
+            {
+                "id": conv.id,
+                "title": conv.title,
+                "created_at": conv.created_at,
+                "updated_at": conv.updated_at
+            }
+            for conv in conversations
         ]
     }

@@ -5,11 +5,18 @@ from app.core.config import settings
 from app.db.connection import get_db
 from app.schemas.session import SessionCreate
 from app.models.session import Session
+
 class SessionService:
-    def __init__(self,DBSession):
+    def __init__(self, DBSession):
         self.db = DBSession
 
-    def create_session(self,ip_address,user_agent) -> Session:
+    def create_session(self, ip_address: str, user_agent: str) -> Session:
+        existing_session = self.db.query(Session).filter(Session.ip_address == ip_address).order_by(Session.expires_at.desc()).first()
+
+        if existing_session:
+            if existing_session.expires_at and existing_session.expires_at > datetime.utcnow():
+                return existing_session
+
         session_data = SessionCreate(
             ip_address=ip_address,
             user_agent=user_agent
@@ -31,15 +38,13 @@ class SessionService:
 
     def is_session_valid(self, session_id: str) -> bool:
         session = self.db.query(Session).filter(Session.session_id == session_id).first()
-
         if not session:
             return False
-
         if session.expires_at and session.expires_at < datetime.utcnow():
             return False
-
         return True
 
+    @staticmethod
     def get_session_service(db: Session = Depends(get_db)):
         return SessionService(db)
 
