@@ -59,19 +59,20 @@ def build_graph():
     )
 
     workflow.add_edge("generate_sql_query", "execute_sql_tool_node")
-    workflow.add_edge("execute_sql_tool_node", END)
+    workflow.add_edge("execute_sql_tool_node", "conversation")
+    workflow.add_edge("conversation", END)
 
     workflow.add_edge("execute_rag_search_tool_node", "conversation")
     workflow.add_edge("conversation", END)
 
-    '''
-        compiled_graph = workflow.compile()
-        image_bytes = compiled_graph.get_graph().draw_mermaid_png()
-        with open("agent_workflow_graph.png", "wb") as f:
-            f.write(image_bytes)
-        print("Graph saved as 'agent_workflow_graph.png'")
-        from IPython.display import Image, display
-        display(Image(image_bytes))
-    '''
+
+    compiled_graph = workflow.compile()
+    image_bytes = compiled_graph.get_graph().draw_mermaid_png()
+    with open("agent_workflow_graph.png", "wb") as f:
+        f.write(image_bytes)
+    print("Graph saved as 'agent_workflow_graph.png'")
+    from IPython.display import Image, display
+    display(Image(image_bytes))
+
 
     return workflow.compile()
