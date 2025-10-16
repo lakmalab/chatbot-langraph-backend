@@ -34,52 +34,18 @@ async def send_message(
 @router.get("/history/{conversation_id}")
 async def get_chat_history(
         conversation_id: int,
-        db: DBSession = Depends(get_db)
+        chat_service: ChatService = Depends(get_chat_service),
 ):
-    messages = db.query(ChatMessage).filter(
-        ChatMessage.conversation_id == conversation_id
-    ).order_by(ChatMessage.created_at).all()
-
-    print("get_chat_history called")
-    return {
-        "conversation_id": conversation_id,
-        "messages": [
-            {
-                "id": msg.id,
-                "role": msg.role,
-                "content": msg.content,
-                "intent": msg.intent,
-                "created_at": msg.created_at
-            }
-            for msg in messages
-        ]
-    }
+    return await chat_service.get_chat_history(conversation_id=conversation_id)
 
 
 @router.get("/conversations/{session_id}")
 async def get_user_conversations(
         session_id: str,
-        db: DBSession = Depends(get_db)
+        chat_service: ChatService = Depends(get_chat_service),
 ):
-    conversations = db.query(Conversation).filter(
-        Conversation.session_id == session_id
-    ).order_by(Conversation.updated_at.desc()).all()
-    conversations_object = {
-        "session_id": session_id,
-        "conversations": [
-            {
-                "id": conv.id,
-                "title": conv.title,
-                "created_at": conv.created_at,
-                "updated_at": conv.updated_at
-            }
-            for conv in conversations
-        ]
-    }
+    return await chat_service.get_user_conversations(session_id=session_id)
 
-    #print(conversations_object)
-
-    return conversations_object
 
 
 @router.get("/conversations/new/{session_id}")

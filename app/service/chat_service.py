@@ -182,6 +182,46 @@ class ChatService:
     def _get_trace_url(self):
         return "https://smith.langchain.com"
 
+    async def get_chat_history(self, conversation_id):
+        messages = self.db.query(ChatMessage).filter(
+            ChatMessage.conversation_id == conversation_id
+        ).order_by(ChatMessage.created_at).all()
+
+        return {
+            "conversation_id": conversation_id,
+            "messages": [
+                {
+                    "id": msg.id,
+                    "role": msg.role,
+                    "content": msg.content,
+                    "intent": msg.intent,
+                    "created_at": msg.created_at
+                }
+                for msg in messages
+            ]
+        }
+
+    async def get_user_conversations(self, session_id):
+        conversations = self.db.query(Conversation).filter(
+            Conversation.session_id == session_id
+        ).order_by(Conversation.updated_at.desc()).all()
+        conversations_object = {
+            "session_id": session_id,
+            "conversations": [
+                {
+                    "id": conv.id,
+                    "title": conv.title,
+                    "created_at": conv.created_at,
+                    "updated_at": conv.updated_at
+                }
+                for conv in conversations
+            ]
+        }
+
+        # print(conversations_object)
+
+        return conversations_object
+
 
 def get_chat_service(db: DBSession = Depends(get_db)) -> ChatService:
     return ChatService(db)
