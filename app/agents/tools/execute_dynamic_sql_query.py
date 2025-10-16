@@ -3,9 +3,7 @@ from sqlalchemy.orm import Session as DBSession
 from sqlalchemy import text
 from app.db.connection import get_db
 
-# Store the database session
 _db_session: DBSession = None
-
 
 def set_db_session(db: DBSession):
     global _db_session
@@ -24,7 +22,6 @@ def execute_dynamic_sql_query(sql_query: str):
         rows = result.fetchall()
         columns = result.keys()
 
-        # Convert rows to list of dictionaries
         data = [dict(zip(columns, row)) for row in rows]
 
         return {
