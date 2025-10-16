@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # LangGraph Agentic AI Chat Assistant
 
 An intelligent **Agentic AI Chat Assistant** powered by **LangGraph + FastAPI**, designed to classify user intent, extract key data, and perform dynamic calculations such as **pension or insurance estimation** — all managed seamlessly using **UV**, the next-gen Python package manager.
@@ -9,34 +8,7 @@ An intelligent **Agentic AI Chat Assistant** powered by **LangGraph + FastAPI**,
 
 **Example Flow**
 
-```
-User: "I am 30 and want 50k pension"
-           ↓
-    [LangGraph Graph]
-           ↓
-┌─────────────────────┐
-│ Node 1: Classify    │ → "pension / crop insurance / vehicle insurance"
-│ Intent              │
-└──────────┬──────────┘
-           │
-           │  "pension" intent detected
-           │
-           ↓
-┌─────────────────────┐
-│ Node 2: Extract     │ → age = 30, pension = 50000
-│ Parameters          │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Node 3: Calculate   │ → Uses PensionCalculator
-│ Pension             │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Node 4: Generate    │ → Natural language response
-│ Response            │
-└─────────────────────┘
-```
+![Agent Workflow](agent_workflow_graph.png)
 
 ---
 

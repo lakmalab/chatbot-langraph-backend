@@ -4,7 +4,7 @@ from app.db.connection import Base
 
 
 class PensionPremium(Base):
-    __tablename__ = "pension_entry_ages"
+    __tablename__ = "pension_premiums"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     entry_age = Column(Integer, nullable=False)
