@@ -9,8 +9,8 @@ from app.agents.state import AgentState
 from app.agents.nodes.sql_query_generate_tool import generate_sql_query
 from IPython.display import Image, display
 
-def build_graph():
 
+def build_graph():
     workflow = StateGraph(AgentState)
 
     workflow.add_node("classify_intent", classify_intent)
@@ -25,7 +25,7 @@ def build_graph():
         if intent in ["calculate"]:
             return "gather_user_info"
         if intent in ["question"]:
-            return "question"  #TODO: implement question node with RAG
+            return "question"  # TODO: implement question node with RAG
         return "conversation"
 
     def route_after_gather_info(state: AgentState) -> str:
@@ -65,14 +65,14 @@ def build_graph():
     workflow.add_edge("execute_rag_search_tool_node", "conversation")
     workflow.add_edge("conversation", END)
 
-
-    compiled_graph = workflow.compile()
-    image_bytes = compiled_graph.get_graph().draw_mermaid_png()
-    with open("agent_workflow_graph.png", "wb") as f:
-        f.write(image_bytes)
-    print("Graph saved as 'agent_workflow_graph.png'")
-    from IPython.display import Image, display
-    display(Image(image_bytes))
-
+    '''
+        compiled_graph = workflow.compile()
+        image_bytes = compiled_graph.get_graph().draw_mermaid_png()
+        with open("agent_workflow_graph.png", "wb") as f:
+            f.write(image_bytes)
+        print("Graph saved as 'agent_workflow_graph.png'")
+        from IPython.display import Image, display
+        display(Image(image_bytes))
+    '''
 
     return workflow.compile()
