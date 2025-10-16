@@ -10,6 +10,7 @@ from app.models.chat_message import ChatMessage
 from app.agents.graph import build_graph
 from app.agents.state import AgentState
 from typing import Dict, Any, Optional
+from langsmith import traceable
 
 
 class ChatService:
@@ -93,7 +94,8 @@ class ChatService:
             session_id: str,
             user_message: str,
             conversation_id: Optional[int] = None,
-            scheme_type: SchemeType = SchemeType.PENSION # TODO: lakmal bro remove this if youy ever decide to support multiple scheme types
+            scheme_type: SchemeType = SchemeType.PENSION
+            # TODO: lakmal bro remove this if youy ever decide to support multiple scheme types
     ) -> Dict[str, Any]:
 
         conversation = self.get_or_create_conversation(
@@ -148,5 +150,38 @@ class ChatService:
                 "tool_results": result.get("tool_results")
             }
         }
+
+    async def add_new_conversation(self, session_id):
+
+        new_conversation = Conversation(
+            session_id=session_id,
+            title="New Conversation"
+        )
+        self.db.add(new_conversation)
+        self.db.commit()
+        self.db.refresh(new_conversation)
+
+        conversations = self.db.query(Conversation).filter(
+            Conversation.session_id == session_id
+        ).order_by(Conversation.updated_at.desc()).all()
+        conversations_object = {
+            "session_id": session_id,
+            "conversations": [
+                {
+                    "id": conv.id,
+                    "title": conv.title,
+                    "created_at": conv.created_at,
+                    "updated_at": conv.updated_at
+                }
+                for conv in conversations
+            ]
+        }
+
+        return conversations_object
+
+    def _get_trace_url(self):
+        return "https://smith.langchain.com"
+
+
 def get_chat_service(db: DBSession = Depends(get_db)) -> ChatService:
     return ChatService(db)

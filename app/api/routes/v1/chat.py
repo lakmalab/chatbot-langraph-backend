@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as DBSession
 from app.db.connection import get_db
 from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, MessageHistory
+from app.service import session_service
 from app.service.chat_service import ChatService
 from app.service.session_service import SessionService, get_session_service
 from app.service.chat_service import get_chat_service
@@ -9,6 +10,7 @@ from app.models.chat_message import ChatMessage
 from app.models.conversation import Conversation
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
+
 
 @router.post("/message", response_model=ChatMessageResponse)
 async def send_message(
@@ -27,6 +29,7 @@ async def send_message(
     )
 
     return ChatMessageResponse(**result)
+
 
 @router.get("/history/{conversation_id}")
 async def get_chat_history(
@@ -51,6 +54,8 @@ async def get_chat_history(
             for msg in messages
         ]
     }
+
+
 @router.get("/conversations/{session_id}")
 async def get_user_conversations(
         session_id: str,
@@ -59,8 +64,7 @@ async def get_user_conversations(
     conversations = db.query(Conversation).filter(
         Conversation.session_id == session_id
     ).order_by(Conversation.updated_at.desc()).all()
-
-    return {
+    conversations_object = {
         "session_id": session_id,
         "conversations": [
             {
@@ -72,3 +76,23 @@ async def get_user_conversations(
             for conv in conversations
         ]
     }
+
+    #print(conversations_object)
+
+    return conversations_object
+
+
+@router.get("/conversations/new/{session_id}")
+async def add_new_conversation(
+        session_id: str,
+        chat_service: ChatService = Depends(get_chat_service),
+        session_service: SessionService = Depends(get_session_service),
+):
+    if not session_service.is_session_valid(session_id):
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+
+    result = await chat_service.add_new_conversation(
+        session_id=session_id
+    )
+
+    return result
