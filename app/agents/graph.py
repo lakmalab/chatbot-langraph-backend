@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, END
 
 from app.agents.nodes.conversation import generate_conversational_response
+from app.agents.nodes.execute_rag_search_tool_node import execute_rag
 from app.agents.nodes.execute_sql_tool_node import execute_sql_tool_node
 from app.agents.nodes.gather_user_info import gather_user_info
 from app.agents.nodes.intent_classifier import classify_intent
@@ -17,6 +18,7 @@ def build_graph():
     workflow.add_node("gather_user_info", gather_user_info)
     workflow.add_node("generate_sql_query", generate_sql_query)
     workflow.add_node("execute_sql_tool_node", execute_sql_tool_node)
+    workflow.add_node("execute_rag_search_tool_node", execute_rag)
 
     def route_after_intent(state: AgentState) -> str:
         intent = state.get("intent")
@@ -42,7 +44,7 @@ def build_graph():
         {
             "conversation": "conversation",
             "gather_user_info": "gather_user_info",
-            "question": "conversation"
+            "question": "execute_rag_search_tool_node"
         }
     )
 
@@ -58,6 +60,9 @@ def build_graph():
 
     workflow.add_edge("generate_sql_query", "execute_sql_tool_node")
     workflow.add_edge("execute_sql_tool_node", END)
+
+    workflow.add_edge("execute_rag_search_tool_node", "conversation")
+    workflow.add_edge("conversation", END)
 
     '''
         compiled_graph = workflow.compile()
