@@ -13,7 +13,6 @@ class SessionService:
 
     def create_session(self, ip_address: str, user_agent: str) -> Session:
         existing_session = self.db.query(Session).filter(Session.ip_address == ip_address).order_by(Session.expires_at.desc()).first()
-
         existing_session = (
             self.db.query(Session)
             .filter(Session.ip_address == ip_address)
@@ -22,14 +21,12 @@ class SessionService:
         )
 
         if existing_session and existing_session.expires_at > datetime.utcnow():
-            # 2️⃣ Check if conversation exists for this session
             conversation = (
                 self.db.query(Conversation)
                 .filter(Conversation.session_id == existing_session.session_id)
                 .first()
             )
 
-            # 3️⃣ If no conversation exists, create one
             if not conversation:
                 new_conversation = Conversation(
                     session_id=existing_session.session_id,
@@ -39,7 +36,6 @@ class SessionService:
                 self.db.commit()
                 self.db.refresh(new_conversation)
 
-            # ✅ Return the existing valid session
             return existing_session
 
         session_data = SessionCreate(
