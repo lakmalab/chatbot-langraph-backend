@@ -85,12 +85,6 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         state["response"] = response.content
         return state
 
-    system_prompt = """
-    You are a warm, friendly pension advisor for farmers.
-    Keep your answers encouraging, simple, and easy to follow.
-    """
-    messages = [SystemMessage(content=system_prompt)]
-
-    response = llm.invoke(messages)
-    state["response"] = response.content
-    return state
+    else:
+        state["response"] = "I'm sorry, I didn't quite understand that. Could you please clarify your request?"
+        return state
