@@ -1,17 +1,32 @@
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain.memory import ConversationBufferMemory
+from langchain_core.messages import HumanMessage, AIMessage
 from app.agents.state import AgentState
 
 
-def get_context(state: AgentState):
-    messages = state.get("messages", [])
-    recent_context = []
-    user_query = state.get("user_query", "")
+class getContextMemory:
+    def __init__(self):
+        self.memory = ConversationBufferMemory(memory_key="chat_history",
+                                               return_messages=True,
+                                               output_key="response")
 
-    # take the last 4 messages for context
-    for msg in messages[-4:]:
-        role = "User" if msg.type == "human" else "Assistant"
-        recent_context.append(f"{role}: {msg.content}")
+    def add_message(self, role: str, content: str):
+        if role.lower() == "user":
+            self.memory.save_context({"input": content}, {"response": ""})
+        elif role.lower() == "assistant":
+            self.memory.save_context({"input": ""}, {"response": content})
 
-    context_str = "\n".join(recent_context)
+    def get_history(self, limit: int = None):
+        variables = self.memory.load_memory_variables(inputs={})
+        messages = variables.get("chat_history", [])
 
-    return f"Conversation:\n{context_str}\n\nUser's latest message:\n{user_query}"
+        if limit is not None:
+            messages = messages[-limit:]
+
+        converted = []
+        for msg in messages:
+            if msg.type == "human":
+                converted.append(HumanMessage(content=msg.content))
+            elif msg.type == "ai":
+                converted.append(AIMessage(content=msg.content))
+        return converted
+

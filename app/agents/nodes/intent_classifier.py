@@ -1,6 +1,6 @@
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from app.agents.get_context import get_context
+from app.agents.get_context import getContextMemory
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -11,7 +11,10 @@ def classify_intent(state: AgentState) -> AgentState:
 
     llm = get_llm(temperature=0.2, provider=AiModel.OPENAI)
 
-    context_str = get_context(state)
+    user_message = state.get("user_query", "")
+    episodic_memory = getContextMemory()
+    episodic_memory.add_message("user", user_message)
+    messages_for_llm = episodic_memory.get_history(limit=20)
 
     system_prompt = """
     You are an intelligent intent classifier for a Farmers Pension Chatbot.
@@ -45,11 +48,12 @@ def classify_intent(state: AgentState) -> AgentState:
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"{context_str}\n\nReturn JSON: {{'intent': 'intent_name'}}")
+        *messages_for_llm,
+        HumanMessage(content='Return output ONLY as valid JSON in this format: {"intent": "intent_name"}')
     ]
 
     response = llm.invoke(messages)
-
+    print("now intent", response)
     try:
         result = json.loads(response.content)
         intent = result.get("intent", "other").strip().lower()

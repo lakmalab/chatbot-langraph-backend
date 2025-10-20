@@ -16,7 +16,7 @@ class AgentState(TypedDict):
 
     missing_info: bool
     generated_sql: Optional[str]
-
+    episodic_memory: Any
     tool_results: str
 
     response: str

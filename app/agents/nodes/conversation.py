@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from app.agents.get_context import get_context
+from app.agents.get_context import getContextMemory
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -11,8 +11,10 @@ def generate_conversational_response(state: AgentState) -> AgentState:
     llm = get_llm(temperature=0.3, provider=AiModel.OPENAI)
     intent = state.get("intent")
 
-
-    context_str = get_context(state)
+    user_message = state.get("user_query", "")
+    episodic_memory = getContextMemory()
+    episodic_memory.add_message("user", user_message)
+    messages_for_llm = episodic_memory.get_history(limit=10)
 
     if intent == "greeting":
         state["response"] = """
@@ -54,10 +56,8 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         Tool says: "The monthly premium is 350 LKR for 20 years."
         Response: "💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a secure pension at 60! 🙏"
         """
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=f"{context_str}\nTool response: {tool_response}"),
-        ]
+        messages = ([SystemMessage(content=system_prompt),] + messages_for_llm +
+                    [HumanMessage(content=f"Tool response: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
@@ -81,10 +81,8 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         Response: "💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a secure pension at 60! 🙏"
         """
 
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=f"{context_str}\nTool response: {tool_response}"),
-        ]
+        messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm +
+                    [HumanMessage(content=f"Tool response: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
@@ -100,11 +98,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
             You understand when a user asks a **follow-up question** (without restating details),
             and you infer what they mean based on the previous topic. if latest user question goes outside oraganizational scope stire conversation toward it."""
 
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(
-                content=f"{context_str}"),
-        ]
+        messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm)
         response = llm.invoke(messages)
         state["response"] = response.content
         return state
