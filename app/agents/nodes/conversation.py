@@ -1,4 +1,6 @@
 from langchain_core.messages import HumanMessage, SystemMessage
+
+from app.agents.get_context import get_context
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -8,6 +10,9 @@ import json
 def generate_conversational_response(state: AgentState) -> AgentState:
     llm = get_llm(temperature=0.3, provider=AiModel.OPENAI)
     intent = state.get("intent")
+
+
+    context_str = get_context(state)
 
     if intent == "greeting":
         state["response"] = """
@@ -51,13 +56,13 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         """
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=f"Tool response: {tool_response}"),
+            HumanMessage(content=f"{context_str}\nTool response: {tool_response}"),
         ]
 
         response = llm.invoke(messages)
         state["response"] = response.content
         return state
-    elif intent == "calculate":
+    elif intent == "database":
         tool_response = state["tool_results"]
 
         system_prompt = """
@@ -78,7 +83,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
 
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=f"Tool response: {tool_response}"),
+            HumanMessage(content=f"{context_str}\nTool response: {tool_response}"),
         ]
 
         response = llm.invoke(messages)
@@ -86,5 +91,20 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         return state
 
     else:
-        state["response"] = "I'm sorry, I didn't quite understand that. Could you please clarify your request?"
+        system_prompt = """
+            You are an intelligent intent classifier for a Farmers Pension Chatbot.
+
+            You must analyze the **entire conversation context** and **the latest user message**
+            to determine the correct intent.
+
+            You understand when a user asks a **follow-up question** (without restating details),
+            and you infer what they mean based on the previous topic. if latest user question goes outside oraganizational scope stire conversation toward it."""
+
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(
+                content=f"{context_str}"),
+        ]
+        response = llm.invoke(messages)
+        state["response"] = response.content
         return state

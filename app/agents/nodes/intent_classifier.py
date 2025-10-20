@@ -1,71 +1,63 @@
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 
+from app.agents.get_context import get_context
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
-from app.core.config import settings
 from app.enums import AiModel
+import json
 
 
 def classify_intent(state: AgentState) -> AgentState:
-    llm = get_llm(temperature=0, provider=AiModel.OPENAI)
+
+    llm = get_llm(temperature=0.2, provider=AiModel.OPENAI)
+
+    context_str = get_context(state)
 
     system_prompt = """
-                    You are an intent classifier for a Pension Scheme Chatbot. 
-                    Your job is to classify the user's latest message into ONE of the following intent categories:
+    You are an intelligent intent classifier for a Farmers Pension Chatbot.
+
+    You must analyze the **entire conversation context** and **the latest user message**
+    to determine the correct intent.
+
+    You understand when a user asks a **follow-up question** (without restating details),
+    and you infer what they mean based on the previous topic.
+
+    Return ONLY one of the following intents:
+
+    - "greeting" → If the user greets or starts a new conversation.
+    - "database" → If the user asks for pension calculation, premium, or payment info.
+                    Tables database has:
+                    **pension_premiums** – Premium payment information by age  
+                    Columns: entry_age (INTEGER), monthly_premium (DECIMAL), num_of_monthly_installments (INTEGER), semi_annual_premium (DECIMAL), 
+                    num_of_semi_annual_installments (INTEGER), lump_sum_payment (DECIMAL)  
                 
-                    1. **calculate**  
-                       - The user wants to calculate or retrieve any *pension-related value*, *premium amount*, *future pension amount*, or *other numeric details* from the pension database.  
-                       - This includes any mention of **age, pension amount, payment method, duration, interest, policy term, or contribution frequency**.  
-                       - If the message implies a computation or lookup of data (even indirectly), choose this.  
-                       - Examples:
-                         - "I'm 30 and want 5000 pension"
-                         - "How much should I pay monthly for 10k pension?"
-                         - "What pension do I get at 60?"
-                         - "Calculate my premium"
-                         - "Show me pension table for age 35"
-                         - "Get details from pension database"
-                
-                    2. **question**  
-                       - The user is asking about *general information*, *rules*, *benefits*, *eligibility*, or *policy features* of the pension scheme — not requesting an actual numeric calculation.  
-                       - Examples:
-                         - "What is the eligibility?"
-                         - "How does the scheme work?"
-                         - "Is it government-backed?"
-                         - "Can I withdraw early?"
-                
-                    3. **greeting**  
-                       - The user is just greeting, starting, or ending the conversation.  
-                       - Examples:
-                         - "Hi", "Hello", "Good morning", "Thanks", "Bye"
-                
-                    4. **unclear**  
-                       - The message is unrelated to pensions or completely off-topic.  
-                       - Examples:
-                         - "Tell me a joke"
-                         - "Who won the football match?"
-                         - "What's the weather like?"
-                         - "Order me a pizza"
-                
-                    **Classification Rules:**
-                    - Always prioritize "calculate" if the message involves **numbers**, **pension**, or **premium calculations**, even if phrased as a question.  
-                    - If the message has *nothing to do with the pension scheme*, classify it as "unclear".  
-                    - Respond with **only one word**: `calculate`, `question`, `greeting`, or `unclear`.
-                    """
+    - "question" → If the user asks for information, rules, eligibility, or general queries.
+    - "other" → If it doesn’t fit the above categories.
+
+    Examples:
+    - "Hello" → greeting
+    - "How much should I pay for 5000 pension?" → database
+    - "Can I join after age 55?" → question
+    - "And what if I stop paying?" (after discussing pension) → question (follow-up)
+    - "Tell me about benefits" → question
+    - "What’s the premium?" → database
+    """
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=state["user_query"])
+        HumanMessage(content=f"{context_str}\n\nReturn JSON: {{'intent': 'intent_name'}}")
     ]
 
     response = llm.invoke(messages)
-    intent = response.content.strip().lower()
 
-    valid_intents = ["calculate", "question", "greeting", "unclear"]
-
-    if intent not in valid_intents:
-        intent = "unclear"
+    try:
+        result = json.loads(response.content)
+        intent = result.get("intent", "other").strip().lower()
+    except Exception:
+        intent = "other"
 
     state["intent"] = intent
-    print(f"Classified intent: {intent}")
+
+    print(f"[IntentClassifier] detected intent: {intent}")
+
     return state

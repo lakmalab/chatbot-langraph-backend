@@ -22,7 +22,7 @@ def build_graph():
 
     def route_after_intent(state: AgentState) -> str:
         intent = state.get("intent")
-        if intent in ["calculate"]:
+        if intent in ["database"]:
             return "gather_user_info"
         if intent in ["question"]:
             return "question"
@@ -66,7 +66,6 @@ def build_graph():
     workflow.add_edge("conversation", END)
     compiled_graph = workflow.compile()
     '''
-        
         image_bytes = compiled_graph.get_graph().draw_mermaid_png()
         with open("agent_workflow_graph.png", "wb") as f:
             f.write(image_bytes)

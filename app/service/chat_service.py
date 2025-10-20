@@ -120,6 +120,7 @@ class ChatService:
             "intent": None,
             "current_age": None,
             "desired_pension": None,
+            "payment_method": None,
             "monthly_premium": None,
             "calculation_result": None,
             "generated_sql": None,
