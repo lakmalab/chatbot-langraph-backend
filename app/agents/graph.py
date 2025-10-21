@@ -3,12 +3,11 @@ from langgraph.graph import StateGraph, END
 from app.agents.nodes.conversation import generate_conversational_response
 from app.agents.nodes.execute_rag_search_tool_node import execute_rag
 from app.agents.nodes.execute_sql_tool_node import execute_sql_tool_node
-from app.agents.nodes.gather_user_info import gather_user_info
 from app.agents.nodes.intent_classifier import classify_intent
 from app.agents.state import AgentState
 from app.agents.nodes.sql_query_generate_tool import generate_sql_query
 from IPython.display import Image, display
-
+from langgraph.checkpoint.memory import MemorySaver
 
 def build_graph():
     workflow = StateGraph(AgentState)
@@ -53,8 +52,9 @@ def build_graph():
 
     workflow.add_edge("execute_rag_search_tool_node", "conversation")
     workflow.add_edge("conversation", END)
-    compiled_graph = workflow.compile()
+
     '''
+        compiled_graph = workflow.compile()
         image_bytes = compiled_graph.get_graph().draw_mermaid_png()
         with open("agent_workflow_graph.png", "wb") as f:
             f.write(image_bytes)
@@ -63,4 +63,5 @@ def build_graph():
         display(Image(image_bytes))
     '''
 
-    return compiled_graph
+    memory = MemorySaver()
+    return workflow.compile(checkpointer=memory)

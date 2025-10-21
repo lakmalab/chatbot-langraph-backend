@@ -1,7 +1,6 @@
 from typing import Dict, Any
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from app.agents.get_context import getContextMemory
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -10,11 +9,11 @@ from app.enums import AiModel
 def generate_sql_query(state: AgentState) -> AgentState:
     llm = get_llm(temperature=0, provider=AiModel.OPENAI)
 
+    conversation_history = state.get("messages", [])
     user_message = state.get("user_query", "")
 
-    episodic_memory = state.get("episodic_memory")
-    episodic_memory.add_message("user", user_message)
-    messages_for_llm = episodic_memory.get_history(limit=10)
+    messages_for_llm = conversation_history.copy()
+    messages_for_llm.append(HumanMessage(content=user_message))
 
     system_prompt = """
     You are an expert SQL query generator for a pension database.

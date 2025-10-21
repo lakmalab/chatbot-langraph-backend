@@ -1,10 +1,10 @@
-from typing import TypedDict, List, Optional, Dict, Any
+from typing import TypedDict, List, Optional, Dict, Any, Annotated
 from langchain_core.messages import BaseMessage
-
+from langgraph.graph.message import add_messages
 
 class AgentState(TypedDict):
 
-    messages: List[BaseMessage]
+    messages: Annotated[List, add_messages]
     user_query: str
 
     session_id: str
@@ -13,7 +13,6 @@ class AgentState(TypedDict):
 
     missing_info: bool
     generated_sql: Optional[str]
-    episodic_memory: Any
     tool_results: str
 
     response: str

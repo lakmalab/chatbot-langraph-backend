@@ -1,8 +1,10 @@
+import asyncio
+from datetime import datetime
+
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
 from fastapi import Depends
 
-from app.agents.get_context import getContextMemory
 from app.db.connection import get_db
 from app.enums import SchemeType
 from app.enums.role import RoleType
@@ -97,7 +99,6 @@ class ChatService:
             user_message: str,
             conversation_id: Optional[int] = None,
             scheme_type: SchemeType = SchemeType.PENSION
-            # TODO: lakmal bro remove this if youy ever decide to support multiple scheme types
     ) -> Dict[str, Any]:
 
         conversation = self.get_or_create_conversation(
@@ -106,13 +107,14 @@ class ChatService:
             scheme_type=scheme_type
         )
 
-        episodic_memory = getContextMemory()
+        mysql_history = self.get_conversation_history(conversation.id)
 
-        history = self.get_conversation_history(conversation.id)
-        for msg in history:
-            role = "user" if isinstance(msg, HumanMessage) else "assistant"
-            episodic_memory.add_message(role, msg.content)
-        episodic_memory.add_message("user", user_message)
+        thread_config = {
+            "configurable": {
+                "thread_id": session_id,
+                "checkpoint_ns": "default"
+            }
+        }
 
         self.save_message(
             conversation_id=conversation.id,
@@ -121,8 +123,6 @@ class ChatService:
         )
 
         initial_state: AgentState = {
-            "messages": episodic_memory.get_history(limit=20),
-            "episodic_memory": episodic_memory,
             "user_query": user_message,
             "session_id": session_id,
             "conversation_id": conversation.id,
@@ -130,11 +130,11 @@ class ChatService:
             "generated_sql": None,
             "tool_results": None,
             "missing_info": True,
-            "response": ""
+            "response": "",
+            "messages": mysql_history
         }
 
-        result = await self.agent.ainvoke(initial_state)
-        episodic_memory.add_message("assistant", result.get("response", ""))
+        result = await self.agent.ainvoke(initial_state, config=thread_config)
 
         response_text = result.get("response", "I'm sorry, I couldn't process that.")
         intent = result.get("intent")
