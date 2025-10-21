@@ -24,6 +24,7 @@ def generate_sql_query(state: AgentState) -> AgentState:
     ---
     ## Tables:
     1. **pension_premiums**
+       #you need to get atleast entry age from user to generate query from here
        Columns:
          - entry_age (INTEGER)
          - monthly_premium (DECIMAL)
@@ -33,10 +34,11 @@ def generate_sql_query(state: AgentState) -> AgentState:
          - lump_sum_payment (DECIMAL)
 
     2. **pension_payouts**
+        #this table has payout pension amounts that are payed after 60,
        Columns:
          - age_bracket (VARCHAR)
          - pension_amount (DECIMAL)
-       Note: pension_amount values are for a 1000 LKR premium.
+       Note: pension_amount values are for a 1000 LKR premium .
 
     ---
     ## Rules:
@@ -48,8 +50,7 @@ def generate_sql_query(state: AgentState) -> AgentState:
     2. If the user mentions an age, include it in a WHERE clause (e.g., WHERE entry_age = 30).
     3. Always limit results to 2 rows unless explicitly requested more.
     4. Order results logically, e.g., by entry_age or age_bracket.
-    5. Never select all columns — include only those relevant to the question.
-    6. Do NOT explain anything or include markdown — return ONLY the SQL query string.
+    5. Do NOT explain anything or include markdown — return ONLY the SQL query string.
 
     ---
     ## Examples
