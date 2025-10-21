@@ -15,7 +15,6 @@ def build_graph():
 
     workflow.add_node("classify_intent", classify_intent)
     workflow.add_node("conversation", generate_conversational_response)
-    workflow.add_node("gather_user_info", gather_user_info)
     workflow.add_node("generate_sql_query", generate_sql_query)
     workflow.add_node("execute_sql_tool_node", execute_sql_tool_node)
     workflow.add_node("execute_rag_search_tool_node", execute_rag)
@@ -23,7 +22,7 @@ def build_graph():
     def route_after_intent(state: AgentState) -> str:
         intent = state.get("intent")
         if intent in ["database"]:
-            return "gather_user_info"
+            return "generate_sql_query"
         if intent in ["question"]:
             return "question"
         return "conversation"
@@ -43,18 +42,8 @@ def build_graph():
         route_after_intent,
         {
             "conversation": "conversation",
-            "gather_user_info": "gather_user_info",
-            "question": "execute_rag_search_tool_node"
-        }
-    )
-
-    workflow.add_conditional_edges(
-        "gather_user_info",
-        route_after_gather_info,
-        {
             "generate_sql_query": "generate_sql_query",
-            "conversation": "conversation",
-            END: END
+            "question": "execute_rag_search_tool_node"
         }
     )
 

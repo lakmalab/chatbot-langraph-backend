@@ -12,7 +12,7 @@ def classify_intent(state: AgentState) -> AgentState:
     llm = get_llm(temperature=0.2, provider=AiModel.OPENAI)
 
     user_message = state.get("user_query", "")
-    episodic_memory = getContextMemory()
+    episodic_memory = state.get("episodic_memory")
     episodic_memory.add_message("user", user_message)
     messages_for_llm = episodic_memory.get_history(limit=20)
 

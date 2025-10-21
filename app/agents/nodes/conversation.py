@@ -12,10 +12,10 @@ def generate_conversational_response(state: AgentState) -> AgentState:
     intent = state.get("intent")
 
     user_message = state.get("user_query", "")
-    episodic_memory = getContextMemory()
+    episodic_memory = state.get("episodic_memory")
     episodic_memory.add_message("user", user_message)
     messages_for_llm = episodic_memory.get_history(limit=10)
-
+    print("messages_for_llm:", messages_for_llm)
     if intent == "greeting":
         state["response"] = """
         👋 Hello! Welcome to the **Farmers Pension Scheme**.

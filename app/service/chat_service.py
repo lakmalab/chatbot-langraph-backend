@@ -121,22 +121,16 @@ class ChatService:
         )
 
         initial_state: AgentState = {
-            "messages": episodic_memory.get_history(limit=10),
+            "messages": episodic_memory.get_history(limit=20),
             "episodic_memory": episodic_memory,
             "user_query": user_message,
             "session_id": session_id,
             "conversation_id": conversation.id,
             "intent": None,
-            "current_age": None,
-            "desired_pension": None,
-            "payment_method": None,
-            "monthly_premium": None,
-            "calculation_result": None,
             "generated_sql": None,
             "tool_results": None,
             "missing_info": True,
-            "response": "",
-            "next_action": None
+            "response": ""
         }
 
         result = await self.agent.ainvoke(initial_state)
