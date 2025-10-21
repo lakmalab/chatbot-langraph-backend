@@ -1,4 +1,6 @@
 from langchain_core.messages import HumanMessage, SystemMessage
+
+from app.agents.get_context import getContextMemory
 from app.agents.llm_provider import get_llm
 from app.agents.state import AgentState
 from app.enums import AiModel
@@ -8,6 +10,11 @@ import json
 def generate_conversational_response(state: AgentState) -> AgentState:
     llm = get_llm(temperature=0.3, provider=AiModel.OPENAI)
     intent = state.get("intent")
+
+    user_message = state.get("user_query", "")
+    episodic_memory = getContextMemory()
+    episodic_memory.add_message("user", user_message)
+    messages_for_llm = episodic_memory.get_history(limit=10)
 
     if intent == "greeting":
         state["response"] = """
@@ -49,15 +56,13 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         Tool says: "The monthly premium is 350 LKR for 20 years."
         Response: "💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a secure pension at 60! 🙏"
         """
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=f"Tool response: {tool_response}"),
-        ]
+        messages = ([SystemMessage(content=system_prompt),] + messages_for_llm +
+                    [HumanMessage(content=f"Tool response: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
         return state
-    elif intent == "calculate":
+    elif intent == "database":
         tool_response = state["tool_results"]
 
         system_prompt = """
@@ -76,21 +81,24 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         Response: "💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a secure pension at 60! 🙏"
         """
 
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=f"Tool response: {tool_response}"),
-        ]
+        messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm +
+                    [HumanMessage(content=f"Tool response: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
         return state
 
-    system_prompt = """
-    You are a warm, friendly pension advisor for farmers.
-    Keep your answers encouraging, simple, and easy to follow.
-    """
-    messages = [SystemMessage(content=system_prompt)]
+    else:
+        system_prompt = """
+            You are an intelligent intent classifier for a Farmers Pension Chatbot.
 
-    response = llm.invoke(messages)
-    state["response"] = response.content
-    return state
+            You must analyze the **entire conversation context** and **the latest user message**
+            to determine the correct intent.
+
+            You understand when a user asks a **follow-up question** (without restating details),
+            and you infer what they mean based on the previous topic. if latest user question goes outside oraganizational scope stire conversation toward it."""
+
+        messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm)
+        response = llm.invoke(messages)
+        state["response"] = response.content
+        return state
