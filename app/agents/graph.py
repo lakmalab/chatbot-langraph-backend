@@ -26,13 +26,10 @@ def build_graph():
             return "question"
         return "conversation"
 
-    def route_after_gather_info(state: AgentState) -> str:
-        missing_info = state.get("missing_info")
-        print(f"Routing from gather_info: {missing_info}")
-        if missing_info is False:
-            return "generate_sql_query"
-        else:
+    def route_user_abort(state: AgentState) -> str:
+        if state.get("user_abort"):
             return END
+        return "conversation"
 
     workflow.set_entry_point("classify_intent")
 
@@ -52,16 +49,16 @@ def build_graph():
 
     workflow.add_edge("execute_rag_search_tool_node", "conversation")
     workflow.add_edge("conversation", END)
+    workflow.add_conditional_edges("conversation", route_user_abort, {"conversation": "conversation"})
 
-    '''
-        compiled_graph = workflow.compile()
-        image_bytes = compiled_graph.get_graph().draw_mermaid_png()
-        with open("agent_workflow_graph.png", "wb") as f:
-            f.write(image_bytes)
-        print("Graph saved as 'agent_workflow_graph.png'")
-        from IPython.display import Image, display
-        display(Image(image_bytes))
-    '''
+    compiled_graph = workflow.compile()
+    image_bytes = compiled_graph.get_graph().draw_mermaid_png()
+    with open("agent_workflow_graph.png", "wb") as f:
+        f.write(image_bytes)
+    print("Graph saved as 'agent_workflow_graph.png'")
+    from IPython.display import Image, display
+    display(Image(image_bytes))
+
 
     memory = MemorySaver()
     return workflow.compile(checkpointer=memory)

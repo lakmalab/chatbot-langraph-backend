@@ -108,7 +108,7 @@ class ChatService:
         )
 
         mysql_history = self.get_conversation_history(conversation.id)
-
+        recent_history = mysql_history[-10:] if len(mysql_history) > 10 else mysql_history
         thread_config = {
             "configurable": {
                 "thread_id": session_id,
@@ -131,7 +131,8 @@ class ChatService:
             "tool_results": None,
             "missing_info": True,
             "response": "",
-            "messages": mysql_history
+            "user_abort": False,
+            "messages": recent_history
         }
 
         result = await self.agent.ainvoke(initial_state, config=thread_config)
@@ -226,6 +227,28 @@ class ChatService:
         # print(conversations_object)
         return conversations_object
 
+    async def abort_conversation(self, session_id: str, conversation_id: int):
+        agent_state = {
+            "session_id": session_id,
+            "conversation_id": conversation_id,
+            "user_abort": True
+        }
+        thread_config = {
+            "configurable": {
+                "thread_id": f"{session_id}",
+                "checkpoint_ns": "default"
+            }
+        }
+
+        await self.agent.ainvoke(agent_state, config=thread_config)
+
+        self.save_message(
+            conversation_id=conversation_id,
+            role=RoleType.USER,
+            content="User aborted the conversation"
+        )
+
+        return "aborted"
 
 def get_chat_service(db: DBSession = Depends(get_db)) -> ChatService:
     return ChatService(db)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as DBSession
 from app.db.connection import get_db
-from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, MessageHistory
+from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, MessageHistory, AbortRequest
 from app.service import session_service
 from app.service.chat_service import ChatService
 from app.service.session_service import SessionService, get_session_service
@@ -36,7 +36,19 @@ async def get_chat_history(
         conversation_id: int,
         chat_service: ChatService = Depends(get_chat_service),
 ):
+
     return await chat_service.get_chat_history(conversation_id=conversation_id)
+
+@router.post("/abort")
+async def abort_conversation(
+        request: AbortRequest,
+        chat_service: ChatService = Depends(get_chat_service),
+):
+    result = await chat_service.abort_conversation(
+        session_id=request.session_id,
+        conversation_id=request.conversation_id,
+    )
+    return result
 
 
 @router.get("/conversations/{session_id}")

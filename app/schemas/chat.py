@@ -13,6 +13,9 @@ class ChatMessageRequest(BaseModel):
     conversation_id: Optional[int] = None
     scheme_type: SchemeType
 
+class AbortRequest(BaseModel):
+    session_id: str
+    conversation_id: Optional[int] = None
 
 class ChatMessageResponse(BaseModel):
     conversation_id: int
