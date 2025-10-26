@@ -17,6 +17,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
     messages_for_llm.append(HumanMessage(content=user_message))
 
     print("messages_for_llm:", messages_for_llm)
+
     if intent == "greeting":
         state["response"] = """
         👋 Hello! Welcome to the **Farmers Pension Scheme**.
@@ -30,10 +31,10 @@ def generate_conversational_response(state: AgentState) -> AgentState:
 
         To begin, please share:
         1️⃣ Your current age (must be between 18–55)  
-        2️⃣ The monthly pension amount you’d like to receive at age 60  
+        2️⃣ The monthly pension amount you'd like to receive at age 60  
         3️⃣ Confirmation that you are:  
-         🇱🇰 A Sri Lankan citizen  
-         👨‍🌾 A farmer by profession  
+         🇱🇰 A Sri Lankan citizen  
+         👨‍🌾 A farmer by profession  
 
         What would you like me to help you with today?
         """
@@ -55,24 +56,28 @@ def generate_conversational_response(state: AgentState) -> AgentState:
 
         Example:
         Tool says: "The monthly premium is 350 LKR for 20 years."
-        Response: "💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a secure pension at 60! 🙏"
+        Response: "💰 You'll just need to pay about **350 LKR per month** for 20 years — that's a small step toward a secure pension at 60! 🙏"
         """
-        messages = ([SystemMessage(content=system_prompt),] + messages_for_llm +
+        messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm +
                     [HumanMessage(content=f"Tool response: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
         return state
+
     elif intent == "database":
-        tool_response = state["tool_results"]
+        tool_response = state.get("tool_results", "")
+
+        # Only generate response if we have tool results (query was executed)
+        if not tool_response:
+            # This shouldn't happen, but handle gracefully
+            return state
 
         system_prompt = """
         You are a **friendly and knowledgeable pension advisor** who helps **Sri Lankan farmers** understand their pension plans. 🇱🇰👨‍🌾  
 
         🎯 **Your Goal:**  
-        Take the **technical or factual answer** from the tool (e.g., from the database) and **rephrase it in a warm, simple, and conversational tone** that any farmer can easily understand.
-
-        If the tool gives an **error**, **incomplete**, or **unclear** result, kindly ask the user for the **necessary missing details** (like entry age) before proceeding to generate the correct database query.  
+        Take the **technical or factual answer** from the database query results and **rephrase it in a warm, simple, and conversational tone** that any farmer can easily understand.
 
         ---
 
@@ -81,7 +86,6 @@ def generate_conversational_response(state: AgentState) -> AgentState:
 
         1. **pension_premiums**  
            - Purpose: Holds premium payment details.  
-           - You must get at least the **entry_age** from the user to query this table.  
            - **Columns:**  
              - entry_age (INTEGER)  
              - monthly_premium (DECIMAL)  
@@ -104,7 +108,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         ✅ Be **friendly and motivational** — make the farmer feel confident.  
         ✅ Use a few **emojis** (💰📊✅🙏) to make the message engaging.  
         ✅ **Highlight important numbers and benefits** (use bold for clarity).  
-        ✅ If data is missing, politely ask the user for it — don’t make assumptions.  
+        ✅ Thank them for confirming and proceeding with the query.
 
         ---
 
@@ -114,7 +118,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         > The monthly premium is 350 LKR for 20 years.
 
         **Your Response:**  
-        > 💰 You’ll just need to pay about **350 LKR per month** for 20 years — that’s a small step toward a **secure pension at 60**! 🙏  
+        > 💰 Great news! You'll just need to pay about **350 LKR per month** for 20 years — that's a small step toward a **secure pension at 60**! 🙏  
 
         ---
 
@@ -122,7 +126,7 @@ def generate_conversational_response(state: AgentState) -> AgentState:
         """
 
         messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm +
-                    [HumanMessage(content=f"Tool response: {tool_response}")])
+                    [HumanMessage(content=f"Database query results: {tool_response}")])
 
         response = llm.invoke(messages)
         state["response"] = response.content
@@ -130,13 +134,13 @@ def generate_conversational_response(state: AgentState) -> AgentState:
 
     else:
         system_prompt = """
-            You are an intelligent intent classifier for a Farmers Pension Chatbot.
+            You are an intelligent assistant for a Farmers Pension Chatbot.
 
-            You must analyze the **entire conversation context** and **the latest user message**
-            to determine the correct intent.
+            Analyze the conversation context and provide a helpful response.
+            If the user's question is outside the scope of pension information,
+            gently guide them back to pension-related topics.
 
-            You understand when a user asks a **follow-up question** (without restating details),
-            and you infer what they mean based on the previous topic. if latest user question goes outside oraganizational scope stire conversation toward it."""
+            Keep your tone friendly and supportive."""
 
         messages = ([SystemMessage(content=system_prompt), ] + messages_for_llm)
         response = llm.invoke(messages)

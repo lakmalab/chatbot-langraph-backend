@@ -16,3 +16,7 @@ class AgentState(TypedDict):
     tool_results: str
     user_abort: bool
     response: str
+
+    query_params: Optional[Dict[str, Any]]
+    awaiting_confirmation: bool
+    user_confirmed: Optional[bool]
