@@ -184,7 +184,8 @@ class ChatService:
                 "calculation_result": result.get("calculation_result"),
                 "tool_results": result.get("tool_results"),
                 "awaiting_confirmation": result.get("awaiting_confirmation", False),
-                "query_params": result.get("query_params")
+                "query_params": result.get("query_params"),
+                "user_confirmed": result.get("user_confirmed")
             }
         }
 

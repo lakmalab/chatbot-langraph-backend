@@ -1,7 +1,7 @@
 from enum import Enum
 
 class SchemeType(str, Enum):
-    PENSION = "pension"
+    PENSION = "PENSION"
     VEHICLE = "vehicle"
     CROP = "crop"
     OTHER = "other"
