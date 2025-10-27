@@ -1,6 +1,10 @@
+import asyncio
+from datetime import datetime
+
 from sqlalchemy.orm import Session as DBSession
 from langchain_core.messages import HumanMessage, AIMessage
 from fastapi import Depends
+
 from app.db.connection import get_db
 from app.enums import SchemeType
 from app.enums.role import RoleType
@@ -14,9 +18,13 @@ from langsmith import traceable
 
 
 class ChatService:
+    _shared_agent = None
+
     def __init__(self, db: DBSession):
         self.db = db
-        self.agent = build_graph()
+        if ChatService._shared_agent is None:
+            ChatService._shared_agent = build_graph()
+        self.agent = ChatService._shared_agent
 
     def get_or_create_conversation(
             self,
@@ -95,7 +103,6 @@ class ChatService:
             user_message: str,
             conversation_id: Optional[int] = None,
             scheme_type: SchemeType = SchemeType.PENSION
-            # TODO: lakmal bro remove this if youy ever decide to support multiple scheme types
     ) -> Dict[str, Any]:
 
         conversation = self.get_or_create_conversation(
@@ -104,7 +111,28 @@ class ChatService:
             scheme_type=scheme_type
         )
 
-        history = self.get_conversation_history(conversation.id)
+        mysql_history = self.get_conversation_history(conversation.id)
+        recent_history = mysql_history[-10:] if len(mysql_history) > 10 else mysql_history
+
+        thread_config = {
+            "configurable": {
+                "thread_id": f"{session_id}_conv_{conversation.id}"
+            }
+        }
+
+        has_existing_state = False
+        try:
+            current_state = self.agent.get_state(thread_config)
+            if current_state and hasattr(current_state, 'values') and current_state.values:
+                has_existing_state = True
+                print(f"[ChatService] Existing state found")
+                print(
+                    f"[ChatService] awaiting_confirmation: {current_state.values.get('awaiting_confirmation', False)}")
+            else:
+                print(f"[ChatService] No state values found")
+        except Exception as e:
+            print(f"[ChatService] No existing state: {e}")
+            has_existing_state = False
 
         self.save_message(
             conversation_id=conversation.id,
@@ -112,24 +140,31 @@ class ChatService:
             content=user_message
         )
 
-        initial_state: AgentState = {
-            "messages": history + [HumanMessage(content=user_message)],
+
+        input_state = {
             "user_query": user_message,
             "session_id": session_id,
             "conversation_id": conversation.id,
-            "intent": None,
-            "current_age": None,
-            "desired_pension": None,
-            "monthly_premium": None,
-            "calculation_result": None,
-            "generated_sql": None,
-            "tool_results": None,
-            "missing_info": True,
-            "response": "",
-            "next_action": None
+            "messages": recent_history,
         }
 
-        result = await self.agent.ainvoke(initial_state)
+        if not has_existing_state:
+            input_state.update({
+                "intent": None,
+                "generated_sql": None,
+                "tool_results": "",
+                "missing_info": False,
+                "response": "",
+                "user_abort": False,
+                "awaiting_confirmation": False,
+                "user_confirmed": None,
+                "query_params": None,
+            })
+            print("[ChatService] Initializing new conversation state")
+        else:
+            print("[ChatService] Using existing state, only updating user_query and messages")
+
+        result = await self.agent.ainvoke(input_state, config=thread_config)
 
         response_text = result.get("response", "I'm sorry, I couldn't process that.")
         intent = result.get("intent")
@@ -147,7 +182,10 @@ class ChatService:
             "intent": intent,
             "metadata": {
                 "calculation_result": result.get("calculation_result"),
-                "tool_results": result.get("tool_results")
+                "tool_results": result.get("tool_results"),
+                "awaiting_confirmation": result.get("awaiting_confirmation", False),
+                "query_params": result.get("query_params"),
+                "user_confirmed": result.get("user_confirmed")
             }
         }
 
@@ -218,9 +256,28 @@ class ChatService:
             ]
         }
 
-        # print(conversations_object)
-
         return conversations_object
+
+    async def abort_conversation(self, session_id: str, conversation_id: int):
+        thread_config = {
+            "configurable": {
+                "thread_id": f"{session_id}_conv_{conversation_id}"
+            }
+        }
+
+        agent_state = {
+            "user_abort": True
+        }
+
+        await self.agent.ainvoke(agent_state, config=thread_config)
+
+        self.save_message(
+            conversation_id=conversation_id,
+            role=RoleType.USER,
+            content="User aborted the conversation"
+        )
+
+        return "aborted"
 
 
 def get_chat_service(db: DBSession = Depends(get_db)) -> ChatService:
