@@ -113,17 +113,6 @@ alembic revision --autogenerate -m "create new pension scheme tables"
 alembic upgrade head 
 -----
 
-### 🧰 Common UV Commands
-
-| Task                 | Command                            |
-| -------------------- | ---------------------------------- |
-| Add a new dependency | `uv add fastapi`                   |
-| Add a dev dependency | `uv add --dev pytest`              |
-| Remove a dependency  | `uv remove fastapi`                |
-| Lock dependencies    | `uv lock`                          |
-| Run a script         | `uv run python scripts/init_db.py` |
-
----
 
 💡 **Tip:** Once running, talk to your AI assistant about pensions, vehicles, or crop insurance — and watch **LangGraph nodes** perform intent classification, entity extraction, and intelligent reasoning in real time.
 =======
