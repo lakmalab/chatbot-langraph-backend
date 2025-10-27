@@ -1,23 +1,22 @@
-from typing import TypedDict, List, Optional, Dict, Any
+from typing import TypedDict, List, Optional, Dict, Any, Annotated
 from langchain_core.messages import BaseMessage
-
+from langgraph.graph.message import add_messages
 
 class AgentState(TypedDict):
 
-    messages: List[BaseMessage]
+    messages: Annotated[List, add_messages]
     user_query: str
 
     session_id: str
     conversation_id: Optional[int]
     intent: Optional[str]
-    current_age: Optional[int]
-    desired_pension: Optional[float]
-    payment_method: Optional[str]
 
     missing_info: bool
     generated_sql: Optional[str]
-    episodic_memory: Any
     tool_results: str
-
+    user_abort: bool
     response: str
-    next_action: Optional[str]
+
+    query_params: Optional[Dict[str, Any]]
+    awaiting_confirmation: bool
+    user_confirmed: Optional[bool]
